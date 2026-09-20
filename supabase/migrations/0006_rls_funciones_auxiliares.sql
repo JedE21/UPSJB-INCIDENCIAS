@@ -2,7 +2,7 @@
 -- SIR-UPSJB · 0006_rls_funciones_auxiliares.sql
 -- Seguridad: funciones auxiliares para RLS + endurecimiento del perímetro.
 --
-· Principio: la seguridad vive en PostgreSQL. El frontend oculta botones,
+-- · Principio: la seguridad vive en PostgreSQL. El frontend oculta botones,
 --   pero SIEMPRE el que decide es RLS (ver docs/01 §8.1 y FASES.md FASE 3).
 --
 -- Decisiones de diseño:
@@ -13,6 +13,13 @@
 --     por fila; son seguras y rápidas (plan cacheado, sin recursión de policies).
 --   · El PERMISO efectivo es la unión de los permisos de todos los roles (§8.1).
 -- ============================================================================
+
+-- ----------------------------------------------------------------------------
+-- ESQUEMA PRIVADO de apoyo (lo requieren las funciones de la sección 5 y la
+-- tabla tecnico_area_admin de la sección 6; no se expone por la API PostgREST)
+-- ----------------------------------------------------------------------------
+create schema if not exists private;
+revoke all on schema private from anon, authenticated;
 
 -- ----------------------------------------------------------------------------
 -- 0. PERÍMETRO: sin GRANT no hay acceso, aunque RLS exista.

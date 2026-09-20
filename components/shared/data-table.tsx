@@ -127,12 +127,25 @@ export function DataTable<T>({
         <TableHeader>
           <TableRow>
             {columns.map((col) => (
-              <TableHead key={col.id} className={col.className}>
+              <TableHead
+                key={col.id}
+                className={col.className}
+                aria-sort={
+                  orden?.id === col.id
+                    ? orden.dir === "asc"
+                      ? "ascending"
+                      : "descending"
+                    : col.sortable && col.value
+                      ? "none"
+                      : undefined
+                }
+              >
                 {col.sortable && col.value ? (
                   <button
                     type="button"
                     onClick={() => alternarOrden(col.id)}
-                    className="inline-flex items-center gap-1 rounded transition-colors hover:text-foreground"
+                    className="inline-flex min-h-8 items-center gap-1 rounded px-1 transition-colors hover:text-foreground focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:outline-none"
+                    aria-label={`Ordenar por ${col.header}`}
                   >
                     {col.header}
                     {orden?.id === col.id ? (

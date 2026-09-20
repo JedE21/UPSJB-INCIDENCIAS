@@ -129,7 +129,7 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
                 <button
                   type="button"
                   onClick={() => descartar(t.id)}
-                  className="rounded-md p-1 opacity-60 transition-opacity hover:opacity-100"
+                  className="rounded-md p-2 opacity-60 transition-opacity hover:opacity-100 focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:outline-none"
                   aria-label="Cerrar notificación"
                 >
                   <X className="size-4" aria-hidden />

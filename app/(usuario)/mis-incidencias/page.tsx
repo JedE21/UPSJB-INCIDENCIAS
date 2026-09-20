@@ -4,15 +4,18 @@ import { ArrowRight, ClipboardList } from "lucide-react";
 import { PageHeader } from "@/components/shared/page-header";
 import { Button } from "@/components/ui/button";
 import { ListaMisIncidencias } from "@/components/usuario/lista-mis-incidencias";
+import { listarMisIncidencias } from "@/lib/incidencias/datos";
 
 export const metadata: Metadata = { title: "Mis incidencias" };
 
 /**
- * MIS INCIDENCIAS — estructura visual (maqueta).
- * La lista real llegará de Supabase (incidencias del usuario, Fase 6) vía RLS;
- * los filtros de esta etapa son solo presentación.
+ * MIS INCIDENCIAS — versión real (Fase 6).
+ * La lista viene de Supabase con RLS: el usuario solo ve lo que le corresponde
+ * (p_incidencias_select); no existe DELETE en la aplicación.
  */
-export default function MisIncidenciasPage() {
+export default async function MisIncidenciasPage() {
+  const incidencias = await listarMisIncidencias();
+
   return (
     <div className="flex flex-col gap-6">
       <PageHeader
@@ -29,7 +32,7 @@ export default function MisIncidenciasPage() {
         }
       />
 
-      <ListaMisIncidencias />
+      <ListaMisIncidencias incidencias={incidencias} />
 
       <p className="text-xs text-muted-foreground">
         ¿Tienes un problema nuevo? Escanea el QR del ambiente o usa{" "}

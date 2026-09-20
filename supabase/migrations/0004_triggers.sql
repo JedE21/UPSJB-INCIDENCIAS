@@ -160,7 +160,9 @@ begin
     join pg_namespace n on n.oid = c.relnamespace
     where t.tgname = esperados.trigger
       and not t.tgisinternal
-      and (n.nspname || '.' || c.relname) = esperados.tabla
+      and (n.nspname || '.' || c.relname) =
+          (case when position('.' in esperados.tabla) > 0
+                then esperados.tabla else 'public.' || esperados.tabla end)
   );
   if faltan > 0 then
     raise exception 'Faltan % triggers esenciales tras la migracion', faltan;

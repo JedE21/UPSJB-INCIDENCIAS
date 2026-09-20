@@ -5,6 +5,7 @@ import {
   Building2,
   ClipboardList,
   Cpu,
+  History,
   Home,
   Info,
   LayoutDashboard,
@@ -14,6 +15,7 @@ import {
   ScrollText,
   Search,
   Settings,
+  ShieldCheck,
   User,
   Users,
   type LucideIcon,
@@ -50,6 +52,7 @@ export const contextNav: Record<
   tecnico: [
     { href: "/tecnico/dashboard", label: "Dashboard", icon: LayoutDashboard, exact: true },
     { href: "/tecnico/incidencias", label: "Mis incidencias", icon: ClipboardList },
+    { href: "/tecnico/historial", label: "Historial", icon: History },
     { href: "/tecnico/perfil", label: "Perfil", icon: User },
   ],
   coordinador: [
@@ -60,6 +63,7 @@ export const contextNav: Record<
     { href: "/admin", label: "Dashboard", icon: LayoutDashboard, exact: true },
     { href: "/admin/incidencias", label: "Incidencias", icon: ClipboardList },
     { href: "/admin/usuarios", label: "Usuarios", icon: Users },
+    { href: "/admin/roles", label: "Roles y permisos", icon: ShieldCheck },
     { href: "/admin/infraestructura", label: "Infraestructura", icon: Building2 },
     { href: "/admin/equipos", label: "Equipos", icon: Cpu },
     { href: "/admin/qr", label: "Códigos QR", icon: QrCode },

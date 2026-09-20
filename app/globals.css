@@ -83,6 +83,49 @@
   body {
     @apply bg-background text-foreground antialiased;
   }
+
+  /* Accesibilidad (§50): foco de teclado SIEMPRE visible y consistente.
+     Los componentes usan focus-visible:ring; esto cubre los casos restantes
+     (links de texto, controles nativos, contenido dinámico). */
+  :focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 2px;
+  }
+
+  /* Respeta la preferencia del sistema de reducir movimiento: ANIMACIONES
+     globales fuera (transiciones cortas quedan; las de Framer Motion se
+     desactivan por componente con useReducedMotion). */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+
+  /* Desplazamiento suave entre anclas (navegación dentro de páginas largas). */
+  html {
+    scroll-behavior: smooth;
+  }
+
+  /* Targets táctiles mínimos (§49 móvil): en pantallas de puntero grueso los
+     inputs y selects suben a 44px (h-9 desktop se mantiene en escritorio). */
+  @media (pointer: coarse) {
+    input[type="text"],
+    input[type="search"],
+    input[type="email"],
+    input[type="password"],
+    input[type="date"],
+    input[type="number"],
+    input[type="tel"],
+    select,
+    textarea {
+      min-height: 2.75rem;
+    }
+  }
 }
 
 /* IMPRESIÓN DE CÓDIGOS QR (módulo QR)

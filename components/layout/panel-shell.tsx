@@ -1,12 +1,16 @@
 import type { ReactNode } from "react";
 import { PanelHeader } from "@/components/layout/panel-header";
 import { MenuUsuario } from "@/components/auth/menu-usuario";
+import { CampanaNotificaciones } from "@/components/notificaciones/campana-notificaciones";
 import type { AppContext } from "@/lib/navigation";
 
 /**
  * Contenedor común de los paneles autenticados.
  * La protección real de rutas por rol vive en el middleware + guards de layout;
  * aquí solo se muestra la sesión ya resuelta en el layout del panel.
+ *
+ * FASE 9: la campana usa el contador realtime provisto por PuertaRealtime
+ * (montado en el layout); si un contexto no lo monta, la campana degrada a 0.
  */
 export function PanelShell({
   context,
@@ -21,6 +25,7 @@ export function PanelShell({
   return (
     <div className="flex min-h-dvh flex-col">
       <PanelHeader context={context}>
+        {sesion ? <CampanaNotificaciones /> : null}
         {sesion ? <MenuUsuario nombre={sesion.nombre} rol={sesion.rol} rutaPerfil={sesion.rutaPerfil} /> : null}
       </PanelHeader>
       <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-8">{children}</main>

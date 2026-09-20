@@ -50,7 +50,7 @@ do $$
 declare
   t text;
 begin
-  foreach t in array array(
+  foreach t in array array[
     'perfiles','roles','permisos','roles_permisos','usuarios_roles',
     'sedes','pabellones','pisos','tipos_ambiente','ambientes','aulas',
     'laboratorios','ambientes_caracteristicas',
@@ -72,7 +72,7 @@ begin
     'categorias_conocimiento','articulos_conocimiento',
     'sesiones_usuario','registros_auditoria',
     'reportes_generados','exportaciones'
-  )
+  ]
   loop
     execute format('alter table public.%I enable row level security', t);
   end loop;

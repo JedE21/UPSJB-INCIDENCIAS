@@ -9,9 +9,8 @@ import { StatusBadge } from "@/components/incidencias/badges";
 import { EmptyState } from "@/components/shared/empty-state";
 import { SearchInput } from "@/components/shared/search-input";
 import { FilterBar } from "@/components/shared/filter-bar";
-import { AvisoDemo } from "@/components/shared/aviso-demo";
 import { fechaCorta } from "@/lib/fechas";
-import { INCIDENCIAS_EJEMPLO } from "@/lib/demo/datos-ejemplo";
+import type { IncidenciaResumen } from "@/lib/incidencias/tipos";
 
 const OPCIONES_ESTADO = [
   { value: "todas", label: "Todos los estados" },
@@ -25,17 +24,18 @@ const OPCIONES_ESTADO = [
 ];
 
 /**
- * Lista visual de "Mis incidencias" (maqueta con datos demo).
- * Filtros y búsqueda son presentación; la consulta real (por usuario, vía RLS)
- * se implementa en la Fase 6.
+ * Lista real de "Mis incidencias" (Fase 6).
+ * Recibe las incidencias leídas en servidor (RLS); la búsqueda y el filtro de
+ * estado son presentación en cliente. Cada tarjeta enlaza al seguimiento por
+ * código único.
  */
-export function ListaMisIncidencias() {
+export function ListaMisIncidencias({ incidencias }: { incidencias: IncidenciaResumen[] }) {
   const [busqueda, setBusqueda] = React.useState("");
   const [estado, setEstado] = React.useState("todas");
 
-  const filtradas = INCIDENCIAS_EJEMPLO.filter((i) => {
+  const filtradas = incidencias.filter((i) => {
     const coincideEstado = estado === "todas" || i.estado === estado;
-    const texto = `${i.codigo} ${i.tipo} ${i.subtipo} ${i.ambiente}`.toLowerCase();
+    const texto = `${i.codigo} ${i.tipo} ${i.subtipo ?? ""} ${i.ambiente_nombre}`.toLowerCase();
     const coincideTexto = texto.includes(busqueda.trim().toLowerCase());
     return coincideEstado && coincideTexto;
   });
@@ -70,7 +70,7 @@ export function ListaMisIncidencias() {
       {filtradas.length > 0 ? (
         <ul className="flex flex-col gap-3" aria-label="Listado de mis incidencias">
           {filtradas.map((i) => (
-            <li key={i.codigo}>
+            <li key={i.id}>
               <Link
                 href={`/seguimiento?codigo=${encodeURIComponent(i.codigo)}`}
                 className="block rounded-xl outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
@@ -83,19 +83,22 @@ export function ListaMisIncidencias() {
                       <StatusBadge estado={i.estado} />
                     </div>
                     <div>
-                      <p className="text-sm font-medium">{i.subtipo}</p>
+                      <p className="text-sm font-medium">
+                        {i.tipo}
+                        {i.subtipo ? ` · ${i.subtipo}` : ""}
+                      </p>
                       <p className="mt-0.5 line-clamp-1 text-sm text-muted-foreground">
-                        {i.resumen}
+                        {i.descripcion}
                       </p>
                     </div>
                     <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted-foreground">
                       <span className="flex items-center gap-1.5">
                         <DoorOpen className="size-3.5" aria-hidden />
-                        {i.ambiente}
+                        {[i.sede, i.pabellon, i.ambiente_nombre].filter(Boolean).join(" · ")}
                       </span>
                       <span className="flex items-center gap-1.5">
                         <CalendarDays className="size-3.5" aria-hidden />
-                        {fechaCorta(i.fechaReporte)}
+                        {fechaCorta(i.fecha_reporte)}
                       </span>
                     </div>
                   </CardContent>
@@ -109,14 +112,12 @@ export function ListaMisIncidencias() {
           icon={FileSearch}
           title="Sin resultados"
           description={
-            INCIDENCIAS_EJEMPLO.length === 0
+            incidencias.length === 0
               ? "Aún no reportaste incidencias. Escanea el QR del ambiente o usa el botón “Reportar incidencia”."
               : "Ninguna incidencia coincide con la búsqueda o el filtro aplicado."
           }
         />
       )}
-
-      <AvisoDemo />
     </div>
   );
 }

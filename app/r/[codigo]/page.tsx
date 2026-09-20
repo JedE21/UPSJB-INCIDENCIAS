@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { CircleSlash, MapPin, QrCode, ScanLine, ShieldAlert } from "lucide-react";
+import { CircleSlash, LogIn, MapPin, QrCode, ScanLine, ShieldAlert } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -12,6 +12,13 @@ import { TarjetaAmbiente } from "@/components/incidencias/tarjeta-ambiente";
 import { FormularioReporte } from "@/components/incidencias/formulario-reporte";
 import { RegistrarLecturaQr } from "@/components/qr/registrar-lectura-qr";
 import { resolverQrPublico } from "@/lib/qr/datos";
+import { getSesion } from "@/lib/auth/session";
+import {
+  listarEquiposDeAmbiente,
+  listarPrioridades,
+  listarSubtiposIncidencia,
+  listarTiposIncidencia,
+} from "@/lib/incidencias/datos";
 
 interface Props {
   params: Promise<{ codigo: string }>;
@@ -29,14 +36,14 @@ const CODIGO_REGEX = /^([A-Z0-9]+-)+[0-9]{4}$/;
  *  · El código se valida contra la BD vía RPC SECURITY DEFINER (0011):
  *    si no existe → 404; si existe pero QR/ambiente/sede no están activos →
  *    pantalla 410 clara; solo si disponible=true se muestra el formulario.
- *  · El ambiente NO viene del cliente: el formulario lo recibe como prop
- *    inmutable; su envío usará el ambiente_id resuelto en servidor (Fase 6).
+ *  · El ambiente NO viene del cliente: el formulario recibe el ambiente_id
+ *    resuelto en servidor y la creación exige sesión + permiso (RLS).
  */
 export default async function QrPublicoPage({ params }: Props) {
   const { codigo: codigoParam } = await params;
   const codigo = decodeURIComponent(codigoParam).trim().toUpperCase();
 
-  // Formato inválido → 404 sin tocar la BD (mismo contracto que código inexistente).
+  // Formato inválido → 404 sin tocar la BD (mismo contrato que código inexistente).
   if (!CODIGO_REGEX.test(codigo)) {
     return <PantallaNoEncontrado codigo={codigo} />;
   }
@@ -57,6 +64,23 @@ export default async function QrPublicoPage({ params }: Props) {
   if (!qr.disponible) {
     return <PantallaDeshabilitado codigo={codigo} />;
   }
+
+  // El reporte exige usuario autenticado (usuario_reportante_id NOT NULL en
+  // la práctica; RLS p_incidencias_insert exige perfil activo + permiso).
+  // Sin sesión: pantalla clara de login requerido (no redirección silenciosa).
+  const sesion = await getSesion();
+  if (!sesion) {
+    return <PantallaLoginRequerido retorno={`/r/${codigo}`} />;
+  }
+
+  // Catálogos reales desde la BD (fuente de verdad; semilla 0005) + equipos
+  // del ambiente (RPC 0012; opcional en el reporte).
+  const [tipos, subtipos, prioridades, equipos] = await Promise.all([
+    listarTiposIncidencia(),
+    listarSubtiposIncidencia(),
+    listarPrioridades(),
+    listarEquiposDeAmbiente(qr.ambiente_id),
+  ]);
 
   return (
     <div className="mx-auto w-full max-w-2xl py-8">
@@ -80,7 +104,13 @@ export default async function QrPublicoPage({ params }: Props) {
             qr_codigo: qr.qr_codigo,
           }}
         />
-        <FormularioReporte ambienteId={qr.ambiente_id} ambienteNombre={qr.ambiente_nombre} />
+        <FormularioReporte
+          tipos={tipos}
+          subtipos={subtipos}
+          prioridades={prioridades}
+          ambienteId={qr.ambiente_id}
+          equipos={equipos}
+        />
       </div>
 
       <p className="mt-8 flex items-center justify-center gap-1.5 text-xs text-muted-foreground">
@@ -168,6 +198,34 @@ function PantallaDeshabilitado({ codigo }: { codigo: string }) {
               <MapPin className="size-4" aria-hidden />
               Ir al inicio
             </a>
+          </Button>
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
+
+/** Sin sesión: el QR identificación es pública; reportar requiere cuenta. */
+function PantallaLoginRequerido({ retorno }: { retorno: string }) {
+  return (
+    <div className="mx-auto w-full max-w-2xl py-16">
+      <Card>
+        <CardHeader>
+          <div className="flex size-12 items-center justify-center rounded-xl bg-primary/10">
+            <LogIn className="size-6 text-primary" aria-hidden />
+          </div>
+          <CardTitle className="mt-2 text-xl">Inicia sesión para reportar</CardTitle>
+          <CardDescription>
+            El ambiente fue identificado correctamente. Para registrar la incidencia con tu nombre
+            ingresa con tu cuenta institucional.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="flex flex-col gap-2 sm:flex-row">
+          <Button asChild>
+            <a href={`/login?siguiente=${encodeURIComponent(retorno)}`}>Iniciar sesión</a>
+          </Button>
+          <Button asChild variant="outline">
+            <a href="/">Ir al inicio</a>
           </Button>
         </CardContent>
       </Card>

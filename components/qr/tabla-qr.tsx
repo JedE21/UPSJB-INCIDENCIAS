@@ -73,7 +73,7 @@ export function TablaQr({ filas }: { filas: FilaQR[] }) {
       (estadoFiltro === "activos" && f.activo) ||
       (estadoFiltro === "deshabilitados" && !f.activo);
     const coincideSede = sedeFiltro === "todas" || f.sede === sedeFiltro;
-    const texto = `${f.codigo} ${f.ambiente_nombre} ${f.ambiente_codigo} ${f.ambiente_codigo}`.toLowerCase();
+    const texto = `${f.codigo} ${f.ambiente_nombre} ${f.ambiente_codigo}`.toLowerCase();
     return coincideEstado && coincideSede && texto.includes(busqueda.trim().toLowerCase());
   });
 

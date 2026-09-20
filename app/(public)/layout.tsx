@@ -1,8 +1,20 @@
+import type { Metadata } from "next";
 import { SiteHeader } from "@/components/layout/site-header";
 import { SiteFooter } from "@/components/layout/site-footer";
 import { getSesion } from "@/lib/auth/session";
 import { nombreCompleto } from "@/lib/auth/types";
 import { perfilDeRoles } from "@/lib/auth/roles";
+
+/**
+ * SEO (Fase 14): el grupo público SÍ es indexable (el root layout bloquea
+ * por defecto; aquí se re-habilita para estas rutas y robots.ts afina).
+ */
+export const metadata: Metadata = {
+  robots: {
+    index: true,
+    follow: true,
+  },
+};
 
 export default async function PublicLayout({
   children,

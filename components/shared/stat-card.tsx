@@ -14,6 +14,8 @@ export function StatCard({
   hint,
   className,
   delay = 0,
+  /** Semántica del indicador (refuerza el estado sin depender solo del color). */
+  tono = "neutral",
 }: {
   icon?: LucideIcon;
   label: string;
@@ -23,13 +25,32 @@ export function StatCard({
   className?: string;
   /** Retardo de la animación de aparición (segundos). */
   delay?: number;
+  /** neutro (por defecto) | alerta (riesgo) | peligro (vencido) | exito. */
+  tono?: "neutral" | "alerta" | "peligro" | "exito";
 }) {
+  const bordeTono =
+    tono === "peligro"
+      ? "border-red-200 dark:border-red-500/30"
+      : tono === "alerta"
+        ? "border-amber-200 dark:border-amber-500/30"
+        : tono === "exito"
+          ? "border-green-200 dark:border-green-500/30"
+          : "";
+  const iconoTono =
+    tono === "peligro"
+      ? "bg-red-100 dark:bg-red-500/15 [&_svg]:text-red-600 dark:[&_svg]:text-red-400"
+      : tono === "alerta"
+        ? "bg-amber-100 dark:bg-amber-500/15 [&_svg]:text-amber-600 dark:[&_svg]:text-amber-400"
+        : tono === "exito"
+          ? "bg-green-100 dark:bg-green-500/15 [&_svg]:text-green-600 dark:[&_svg]:text-green-400"
+          : "";
+
   return (
     <FadeIn delay={delay} className={className}>
-      <Card className="h-full gap-0 py-5">
+      <Card className={cn("h-full gap-0 py-5", bordeTono)}>
         <CardContent className="flex flex-col gap-3 px-5">
           {Icon ? (
-            <div className="flex size-10 items-center justify-center rounded-lg bg-primary/10">
+            <div className={cn("flex size-10 items-center justify-center rounded-lg bg-primary/10", iconoTono)}>
               <Icon className="size-5 text-primary" aria-hidden />
             </div>
           ) : null}
