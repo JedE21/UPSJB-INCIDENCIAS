@@ -73,16 +73,23 @@ export function LectorQrWeb() {
   const controlesRef = React.useRef<IScannerControls | null>(null);
   const lectorRef = React.useRef<BrowserMultiFormatReader | null>(null);
   const intervaloRef = React.useRef<number | null>(null);
+  const avisoTimerRef = React.useRef<number | null>(null);
   const navigateRef = React.useRef(router);
   navigateRef.current = router;
 
   const [estado, setEstado] = React.useState<EstadoLector>({ tipo: "apagado" });
+  // Aviso transitorio: se detectó un QR legible pero NO es del sistema.
+  const [avisoAjeno, setAvisoAjeno] = React.useState(false);
 
   /** Detiene cámara y timers de forma segura (idempotente). */
   const detener = React.useCallback(() => {
     if (intervaloRef.current) {
       window.clearInterval(intervaloRef.current);
       intervaloRef.current = null;
+    }
+    if (avisoTimerRef.current) {
+      window.clearTimeout(avisoTimerRef.current);
+      avisoTimerRef.current = null;
     }
     controlesRef.current?.stop();
     controlesRef.current = null;
@@ -157,7 +164,19 @@ export function LectorQrWeb() {
           }
 
           const codigo = extraerCodigoInstitucional(resultado?.getText() ?? "");
-          if (!codigo) return; // QR ajeno o ilegible: se ignora
+          if (!codigo) {
+            // QR legible pero ajeno al sistema: aviso transitorio (no silencio).
+            const crudo = (resultado?.getText() ?? "").trim();
+            if (crudo) {
+              setAvisoAjeno(true);
+              if (avisoTimerRef.current) window.clearTimeout(avisoTimerRef.current);
+              avisoTimerRef.current = window.setTimeout(() => {
+                setAvisoAjeno(false);
+                avisoTimerRef.current = null;
+              }, 2600);
+            }
+            return;
+          }
 
           // Un solo salto: detener cámara y navegar a la ruta pública real.
           detener();
@@ -349,9 +368,20 @@ export function LectorQrWeb() {
                 exit={{ opacity: 0 }}
                 className="absolute inset-x-0 bottom-0 z-10 flex items-center justify-between gap-2 bg-gradient-to-t from-[#0A0606]/95 via-[#0A0606]/50 to-transparent px-4 pb-3 pt-8"
               >
-                <span className="live-dot flex items-center gap-1.5 text-xs font-medium text-[#FF7673]">
-                  Buscando código…
-                </span>
+                <AnimatePresence mode="wait" initial={false}>
+                  <motion.span
+                    key={avisoAjeno ? "ajeno" : "buscando"}
+                    initial={{ opacity: 0, y: 4 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -4 }}
+                    transition={{ duration: 0.2 }}
+                    className={`live-dot flex items-center gap-1.5 text-xs font-medium ${
+                      avisoAjeno ? "text-[#F3ECEC]" : "text-[#FF7673]"
+                    }`}
+                  >
+                    {avisoAjeno ? "QR ajeno · apunta al QR del ambiente" : "Buscando código…"}
+                  </motion.span>
+                </AnimatePresence>
                 <Button
                   size="sm"
                   variant="outline"
