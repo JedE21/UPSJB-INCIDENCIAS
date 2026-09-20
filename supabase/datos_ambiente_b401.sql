@@ -6,8 +6,14 @@
 -- Resultado: QR con código FIJO "B401-0001" y URL estable /r/B401-0001.
 -- ============================================================================
 
--- 1. Sede: se usa la primera registrada y se marca ACTIVA
---    (los QR solo resuelven con sede activa; ajusta el filtro si hay varias).
+-- 1a. Sede: si NO existe ninguna, se crea la Filial Ica (idempotente).
+insert into public.sedes (nombre, codigo, direccion, activa)
+select 'UPSJB — Filial Ica', 'ICA', 'Ica, Perú', true
+where not exists (select 1 from public.sedes)
+on conflict do nothing;
+
+-- 1b. Se usa la primera registrada y se marca ACTIVA
+--     (los QR solo resuelven con sede activa; ajusta el filtro si hay varias).
 update public.sedes set activa = true
 where id = (select id from public.sedes order by creado_en limit 1);
 
