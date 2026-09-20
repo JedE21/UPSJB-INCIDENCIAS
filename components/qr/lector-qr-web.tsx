@@ -79,17 +79,25 @@ export function LectorQrWeb() {
     const lector = new BrowserMultiFormatReader();
     lectorRef.current = lector;
 
-    // Decodificación continua desde el elemento <video> (sin AudioContext).
+    // Decodificación continua CON getUserMedia: decodeFromConstraints pide
+    // la cámara al navegador (muestra el diálogo de permiso) y la enciende.
     lector
-      .decodeFromVideoElement(video, (resultado) => {
-        const texto = resultado?.getText()?.trim()?.toUpperCase();
-        if (!texto || !CODIGO_REGEX.test(texto)) return; // ignora QR ajenos al sistema
+      .decodeFromConstraints(
+        {
+          video: { facingMode: "environment", width: { ideal: 1280 }, height: { ideal: 720 } },
+          audio: false,
+        },
+        video,
+        (resultado) => {
+          const texto = resultado?.getText()?.trim()?.toUpperCase();
+          if (!texto || !CODIGO_REGEX.test(texto)) return; // ignora QR ajenos al sistema
 
-        // Un solo salto: detener cámara y navegar a la ruta pública real.
-        detener();
-        setEstado({ tipo: "apagado" });
-        navigateRef.current.push(`/r/${encodeURIComponent(texto)}`);
-      })
+          // Un solo salto: detener cámara y navegar a la ruta pública real.
+          detener();
+          setEstado({ tipo: "apagado" });
+          navigateRef.current.push(`/r/${encodeURIComponent(texto)}`);
+        },
+      )
       .then((controles) => {
         controlesRef.current = controles;
         setEstado({ tipo: "activo" });
