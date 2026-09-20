@@ -83,7 +83,8 @@ export default async function QrPublicoPage({ params }: Props) {
   ]);
 
   return (
-    <div className="mx-auto w-full max-w-2xl py-8">
+    <div className="relative mx-auto w-full max-w-2xl py-8">
+      <div className="aurora-fondo" aria-hidden />
       <RegistrarLecturaQr codigo={qr.qr_codigo} />
 
       <div className="mb-6 flex items-center gap-2 text-sm text-muted-foreground">
@@ -113,7 +114,7 @@ export default async function QrPublicoPage({ params }: Props) {
         />
       </div>
 
-      <p className="mt-8 flex items-center justify-center gap-1.5 text-xs text-muted-foreground">
+      <p className="font-tecnica mt-8 flex items-center justify-center gap-1.5 text-xs text-muted-foreground">
         <QrCode className="size-3.5" aria-hidden />
         {qr.qr_codigo}
       </p>
@@ -124,8 +125,9 @@ export default async function QrPublicoPage({ params }: Props) {
 /** El servicio no respondió: pantalla amigable (no 500 crudo). */
 function PantallaErrorServicio({ codigo }: { codigo: string }) {
   return (
-    <div className="mx-auto w-full max-w-2xl py-16">
-      <Card>
+    <div className="relative mx-auto w-full max-w-2xl py-16">
+      <div className="aurora-fondo" aria-hidden />
+      <Card className="border-amber-500/30">
         <CardHeader>
           <div className="flex size-12 items-center justify-center rounded-xl bg-amber-500/10">
             <ShieldAlert className="size-6 text-amber-600" aria-hidden />
@@ -133,7 +135,7 @@ function PantallaErrorServicio({ codigo }: { codigo: string }) {
           <CardTitle className="mt-2 text-xl">No se pudo verificar el código</CardTitle>
           <CardDescription>
             Tuvimos un problema temporal al validar el QR{" "}
-            {codigo ? <span className="font-mono">({codigo})</span> : null}. Verifica tu conexión
+            {codigo ? <span className="font-tecnica">({codigo})</span> : null}. Verifica tu conexión
             e intenta de nuevo escaneando el código.
           </CardDescription>
         </CardHeader>
@@ -150,15 +152,16 @@ function PantallaErrorServicio({ codigo }: { codigo: string }) {
 /** QR inexistente (o formato inválido): 404 clara. */
 function PantallaNoEncontrado({ codigo }: { codigo: string }) {
   return (
-    <div className="mx-auto w-full max-w-2xl py-16">
-      <Card>
+    <div className="relative mx-auto w-full max-w-2xl py-16">
+      <div className="aurora-fondo" aria-hidden />
+      <Card className="border-amber-500/30">
         <CardHeader>
           <div className="flex size-12 items-center justify-center rounded-xl bg-amber-500/10">
             <ShieldAlert className="size-6 text-amber-600" aria-hidden />
           </div>
           <CardTitle className="mt-2 text-xl">Código QR no reconocido</CardTitle>
           <CardDescription>
-            El código {codigo ? <span className="font-mono">{codigo}</span> : "escaneado"} no
+            El código {codigo ? <span className="font-tecnica">{codigo}</span> : "escaneado"} no
             corresponde a ningún ambiente registrado. Verifica que escaneaste el QR oficial del
             ambiente o repórtalo en las oficinas de la filial.
           </CardDescription>
@@ -179,8 +182,9 @@ function PantallaNoEncontrado({ codigo }: { codigo: string }) {
 /** QR existente pero deshabilitado / ambiente o sede inactivos: 410 clara. */
 function PantallaDeshabilitado({ codigo }: { codigo: string }) {
   return (
-    <div className="mx-auto w-full max-w-2xl py-16">
-      <Card>
+    <div className="relative mx-auto w-full max-w-2xl py-16">
+      <div className="aurora-fondo" aria-hidden />
+      <Card className="border-amber-500/30">
         <CardHeader>
           <div className="flex size-12 items-center justify-center rounded-xl bg-amber-500/10">
             <CircleSlash className="size-6 text-amber-600" aria-hidden />
@@ -189,7 +193,7 @@ function PantallaDeshabilitado({ codigo }: { codigo: string }) {
           <CardDescription>
             Este código fue reemplazado o deshabilitado por el administrador y ya no puede usarse
             para reportar. Busca el QR vigente en el ambiente{" "}
-            {codigo ? <span className="font-mono">({codigo})</span> : null} o consulta en oficinas.
+            {codigo ? <span className="font-tecnica">({codigo})</span> : null} o consulta en oficinas.
           </CardDescription>
         </CardHeader>
         <CardContent className="flex flex-col gap-2 sm:flex-row">
@@ -208,7 +212,8 @@ function PantallaDeshabilitado({ codigo }: { codigo: string }) {
 /** Sin sesión: el QR identificación es pública; reportar requiere cuenta. */
 function PantallaLoginRequerido({ retorno }: { retorno: string }) {
   return (
-    <div className="mx-auto w-full max-w-2xl py-16">
+    <div className="relative mx-auto w-full max-w-2xl py-16">
+      <div className="aurora-fondo" aria-hidden />
       <Card>
         <CardHeader>
           <div className="flex size-12 items-center justify-center rounded-xl bg-primary/10">
