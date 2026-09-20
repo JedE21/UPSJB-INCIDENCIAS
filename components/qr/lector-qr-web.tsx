@@ -32,9 +32,11 @@ const CODIGO_REGEX = /^([A-Z0-9]+-)+[0-9]{4}$/;
  * Cualquier otro contenido (QRs ajenos) retorna null y se ignora.
  */
 const extraerCodigoInstitucional = (texto: string): string | null => {
-  const limpio = texto.trim().toUpperCase();
-  const desdeUrl = /\/r\/([A-Z0-9-]+)\/?(?:[?#].*)?$/.exec(limpio)?.[1];
-  const candidata = desdeUrl ?? limpio;
+  const limpio = texto.trim();
+  // La ruta /r/ se busca sobre el texto ORIGINAL (la URL es sensible a
+  // mayúsculas: pasar todo a MAYÚSCULAS antes rompía el match ".../R/...").
+  const desdeUrl = /\/r\/([A-Za-z0-9-]+)\/?(?:[?#].*)?$/i.exec(limpio)?.[1];
+  const candidata = (desdeUrl ?? limpio).toUpperCase();
   return CODIGO_REGEX.test(candidata) ? candidata : null;
 };
 
