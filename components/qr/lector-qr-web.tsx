@@ -15,13 +15,33 @@ import { Button } from "@/components/ui/button";
  *   autoplay: los navegadores exigen gesto del usuario para getUserMedia.
  * · La decodificación es 100% local en el navegador (@zxing/browser): el
  *   video no sale del dispositivo (privacidad, sin servidores intermedios).
- * · Solo se acepta el formato institucional de QR de ambiente
- *   /^([A-Z0-9]+-)+[0-9]{4}$/ — cualquier otro contenido se ignora.
+ * · Solo se decodifica el CUADRADO central del encuadre (donde el usuario
+ *   alinea el QR): más fiable y coincide con el marco de la UI.
+ * · Se acepta el código crudo (AMB-...-0001) o la URL impresa en el QR
+ *   (https://.../r/AMB-...-0001); cualquier otro contenido se ignora.
  * · Tras decodificar se navega a /r/<codigo>, la misma ruta que usa el QR
  *   impreso: toda la validación (RPC, disponibilidad, sesión) sigue en
  *   servidor; este componente solo "escribe" la ruta.
  */
 const CODIGO_REGEX = /^([A-Z0-9]+-)+[0-9]{4}$/;
+
+/**
+ * Extrae el código institucional del contenido decodificado:
+ *  · Acepta el código crudo          → PAB-B-P4-LAB-B401-0001
+ *  · Acepta la URL impresa en el QR  → https://sir-upsjb.vercel.app/r/PAB-B-P4-LAB-B401-0001
+ * Cualquier otro contenido (QRs ajenos) retorna null y se ignora.
+ */
+const extraerCodigoInstitucional = (texto: string): string | null => {
+  const limpio = texto.trim().toUpperCase();
+  const desdeUrl = /\/r\/([A-Z0-9-]+)\/?(?:[?#].*)?$/.exec(limpio)?.[1];
+  const candidata = desdeUrl ?? limpio;
+  return CODIGO_REGEX.test(candidata) ? candidata : null;
+};
+
+/** Área de escaneo: fracción del lado del video que se decodifica (cuadrado central). */
+const FRACCION_CUADRO = 0.7;
+/** Frecuencia de intentos de decodificación (ms). */
+const INTERVALO_ESCANEO_MS = 120;
 
 type EstadoLector =
   | { tipo: "apagado" }
@@ -52,6 +72,7 @@ export function LectorQrWeb() {
   const videoRef = React.useRef<HTMLVideoElement | null>(null);
   const controlesRef = React.useRef<IScannerControls | null>(null);
   const lectorRef = React.useRef<BrowserMultiFormatReader | null>(null);
+  const intervaloRef = React.useRef<number | null>(null);
   const navigateRef = React.useRef(router);
   navigateRef.current = router;
 
@@ -59,6 +80,10 @@ export function LectorQrWeb() {
 
   /** Detiene cámara y timers de forma segura (idempotente). */
   const detener = React.useCallback(() => {
+    if (intervaloRef.current) {
+      window.clearInterval(intervaloRef.current);
+      intervaloRef.current = null;
+    }
     controlesRef.current?.stop();
     controlesRef.current = null;
     const stream = videoRef.current?.srcObject as MediaStream | null;
@@ -76,11 +101,16 @@ export function LectorQrWeb() {
     const video = videoRef.current;
     if (!video) return;
 
-    const lector = new BrowserMultiFormatReader();
+    // decodeFromConstraints pide la cámara al navegador (diálogo de permiso)
+    // y enciende el stream. El delay de ZXing se deja alto porque la
+    // decodificación real ocurre en el bucle propio de abajo, SOLO sobre el
+    // cuadrado central (canvas propio) donde el usuario alinea el QR.
+    const lector = new BrowserMultiFormatReader(undefined, {
+      delayBetweenScanAttempts: 10000,
+      delayBetweenScanSuccess: 10000,
+    });
     lectorRef.current = lector;
 
-    // Decodificación continua CON getUserMedia: decodeFromConstraints pide
-    // la cámara al navegador (muestra el diálogo de permiso) y la enciende.
     lector
       .decodeFromConstraints(
         {
@@ -88,19 +118,52 @@ export function LectorQrWeb() {
           audio: false,
         },
         video,
-        (resultado) => {
-          const texto = resultado?.getText()?.trim()?.toUpperCase();
-          if (!texto || !CODIGO_REGEX.test(texto)) return; // ignora QR ajenos al sistema
-
-          // Un solo salto: detener cámara y navegar a la ruta pública real.
-          detener();
-          setEstado({ tipo: "apagado" });
-          navigateRef.current.push(`/r/${encodeURIComponent(texto)}`);
-        },
+        () => {}, // la decodificación real ocurre en el bucle de abajo
       )
       .then((controles) => {
         controlesRef.current = controles;
         setEstado({ tipo: "activo" });
+
+        // Bucle de decodificación sobre el CUADRADO CENTRAL del video.
+        const canvas = document.createElement("canvas");
+        const ctx = canvas.getContext("2d", { willReadFrequently: true });
+        intervaloRef.current = window.setInterval(() => {
+          const v = videoRef.current;
+          if (!ctx || !v || v.readyState < 2 || !v.videoWidth) return;
+
+          const lado = Math.floor(Math.min(v.videoWidth, v.videoHeight) * FRACCION_CUADRO);
+          const ladoCanvas = Math.min(lado, 720);
+          if (canvas.width !== ladoCanvas) {
+            canvas.width = ladoCanvas;
+            canvas.height = ladoCanvas;
+          }
+          ctx.drawImage(
+            v,
+            (v.videoWidth - lado) / 2, // recorte centrado: el marco cuadrado de la UI
+            (v.videoHeight - lado) / 2,
+            lado,
+            lado,
+            0,
+            0,
+            ladoCanvas,
+            ladoCanvas,
+          );
+
+          let resultado;
+          try {
+            resultado = lector.decodeFromCanvas(canvas);
+          } catch {
+            return; // sin QR legible en este intento: se reintenta
+          }
+
+          const codigo = extraerCodigoInstitucional(resultado?.getText() ?? "");
+          if (!codigo) return; // QR ajeno o ilegible: se ignora
+
+          // Un solo salto: detener cámara y navegar a la ruta pública real.
+          detener();
+          setEstado({ tipo: "apagado" });
+          navigateRef.current.push(`/r/${encodeURIComponent(codigo)}`);
+        }, INTERVALO_ESCANEO_MS);
       })
       .catch((error: unknown) => {
         const nombre = (error as { name?: string })?.name ?? "";
@@ -166,10 +229,10 @@ export function LectorQrWeb() {
         </AnimatePresence>
       </div>
 
-      {/* Zona de video con marco de escaneo */}
+      {/* Zona de video CUADRADA (área de escaneo alineada al marco) */}
       <div className="p-2.5">
         <div
-          className={`relative aspect-[4/3] w-full overflow-hidden rounded-2xl bg-[#0A0606] ring-1 ring-white/5 ${
+          className={`relative mx-auto aspect-square w-full max-w-sm overflow-hidden rounded-2xl bg-[#0A0606] ring-1 ring-white/5 ${
             activo ? "marco-vivo" : ""
           }`}
         >
@@ -191,12 +254,13 @@ export function LectorQrWeb() {
           {activo && (
             <div className="pointer-events-none absolute inset-0" aria-hidden>
               <div className="absolute inset-0 rounded-2xl shadow-[inset_0_0_90px_24px_rgb(10_6_6/60%)]" />
-              <span className="esquina-qr absolute left-5 top-5 size-12 rounded-tl-2xl border-l-[3px] border-t-[3px] border-[#FF3936]" />
-              <span className="esquina-qr absolute right-5 top-5 size-12 rounded-tr-2xl border-r-[3px] border-t-[3px] border-[#FF3936] [animation-delay:0.4s]" />
-              <span className="esquina-qr absolute bottom-5 left-5 size-12 rounded-bl-2xl border-b-[3px] border-l-[3px] border-[#FF3936] [animation-delay:0.8s]" />
-              <span className="esquina-qr absolute bottom-5 right-5 size-12 rounded-br-2xl border-b-[3px] border-r-[3px] border-[#FF3936] [animation-delay:1.2s]" />
+              {/* Esquinas alineadas al cuadrado REAL de decodificación (70% central). */}
+              <span className="esquina-qr absolute left-[15%] top-[15%] size-12 rounded-tl-2xl border-l-[3px] border-t-[3px] border-[#FF3936]" />
+              <span className="esquina-qr absolute right-[15%] top-[15%] size-12 rounded-tr-2xl border-r-[3px] border-t-[3px] border-[#FF3936] [animation-delay:0.4s]" />
+              <span className="esquina-qr absolute bottom-[15%] left-[15%] size-12 rounded-bl-2xl border-b-[3px] border-l-[3px] border-[#FF3936] [animation-delay:0.8s]" />
+              <span className="esquina-qr absolute bottom-[15%] right-[15%] size-12 rounded-br-2xl border-b-[3px] border-r-[3px] border-[#FF3936] [animation-delay:1.2s]" />
               {estado.tipo === "activo" && !prefiereMenosMovimiento && (
-                <div className="absolute inset-x-8 top-1/2 h-px">
+                <div className="absolute inset-x-[15%] top-1/2 h-px">
                   {/* Barrido principal + estela difuminada (mockup) */}
                   <span className="lector-scanline absolute inset-x-0 top-0 block h-0.5 rounded-full bg-gradient-to-r from-transparent via-[#FF3936] to-transparent" />
                   <span className="lector-scanline absolute inset-x-0 top-0 block h-3 rounded-full bg-gradient-to-r from-transparent via-[#FF3936]/25 to-transparent blur-md" />
