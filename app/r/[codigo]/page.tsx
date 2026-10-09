@@ -83,7 +83,7 @@ export default async function QrPublicoPage({ params }: Props) {
   ]);
 
   return (
-    <div className="relative mx-auto w-full max-w-2xl py-8">
+    <div className="px-seguro relative mx-auto w-full max-w-2xl py-8">
       <div className="aurora-fondo" aria-hidden />
       <RegistrarLecturaQr codigo={qr.qr_codigo} />
 
@@ -125,7 +125,7 @@ export default async function QrPublicoPage({ params }: Props) {
 /** El servicio no respondió: pantalla amigable (no 500 crudo). */
 function PantallaErrorServicio({ codigo }: { codigo: string }) {
   return (
-    <div className="relative mx-auto w-full max-w-2xl py-16">
+    <div className="px-seguro relative mx-auto w-full max-w-2xl py-16">
       <div className="aurora-fondo" aria-hidden />
       <Card className="border-amber-500/30">
         <CardHeader>
@@ -152,7 +152,7 @@ function PantallaErrorServicio({ codigo }: { codigo: string }) {
 /** QR inexistente (o formato inválido): 404 clara. */
 function PantallaNoEncontrado({ codigo }: { codigo: string }) {
   return (
-    <div className="relative mx-auto w-full max-w-2xl py-16">
+    <div className="px-seguro relative mx-auto w-full max-w-2xl py-16">
       <div className="aurora-fondo" aria-hidden />
       <Card className="border-amber-500/30">
         <CardHeader>
@@ -182,7 +182,7 @@ function PantallaNoEncontrado({ codigo }: { codigo: string }) {
 /** QR existente pero deshabilitado / ambiente o sede inactivos: 410 clara. */
 function PantallaDeshabilitado({ codigo }: { codigo: string }) {
   return (
-    <div className="relative mx-auto w-full max-w-2xl py-16">
+    <div className="px-seguro relative mx-auto w-full max-w-2xl py-16">
       <div className="aurora-fondo" aria-hidden />
       <Card className="border-amber-500/30">
         <CardHeader>
@@ -212,7 +212,7 @@ function PantallaDeshabilitado({ codigo }: { codigo: string }) {
 /** Sin sesión: el QR identificación es pública; reportar requiere cuenta. */
 function PantallaLoginRequerido({ retorno }: { retorno: string }) {
   return (
-    <div className="relative mx-auto w-full max-w-2xl py-16">
+    <div className="px-seguro relative mx-auto w-full max-w-2xl py-16">
       <div className="aurora-fondo" aria-hidden />
       <Card>
         <CardHeader>

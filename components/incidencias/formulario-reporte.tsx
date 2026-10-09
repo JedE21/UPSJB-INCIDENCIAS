@@ -375,7 +375,7 @@ export function FormularioReporte({ tipos, subtipos, prioridades, ambienteId, eq
 
         {/* Acción principal: pegada al fondo en móvil (alcance con el pulgar).
             El mínimo 48px de altura mantiene el target táctil recomendado. */}
-        <div className="sticky bottom-0 -mx-4 flex flex-col gap-1.5 border-t bg-background/95 px-4 pb-4 pt-3 backdrop-blur sm:static sm:mx-0 sm:border-0 sm:bg-transparent sm:px-0 sm:pb-0 sm:backdrop-blur-none">
+        <div className="sticky bottom-0 -mx-4 flex flex-col gap-1.5 border-t bg-background/95 px-4 pt-3 backdrop-blur pb-sticky-seguro sm:static sm:mx-0 sm:border-0 sm:bg-transparent sm:px-0 sm:pb-0 sm:backdrop-blur-none">
           <Button
             type="submit"
             size="lg"

@@ -260,101 +260,172 @@ begin
     p_limite := 12;
   end if;
 
-  -- Base filtrada una sola vez (CTE materializable); cada serie agrega con
-  -- GROUP BY en Postgres (nada de agregar en frontend). Solo se computa la
-  -- serie pedida (IF/ELSE, sin SQL dinámico).
-  with base as (
-    select v.*
-    from public.v_reportes_incidencias v
-    where (p_desde is null or v.fecha_reporte::date >= p_desde)
-      and (p_hasta is null or v.fecha_reporte::date <= p_hasta)
-      and (p_sede_id is null or v.sede_id = p_sede_id)
-      and (p_area_id is null or v.area_id = p_area_id)
-      and (p_estado is null or v.estado = p_estado)
-      and (p_prioridad is null or v.prioridad = p_prioridad)
-      and (p_tipo is null or v.tipo = p_tipo)
-  )
-  -- Estado
+  -- Filtros comunes (se repiten en cada rama: un CTE suelto a nivel de
+  -- función no es sintaxis válida en plpgsql). Cada serie agrega con
+  -- GROUP BY en Postgres; solo se computa la serie pedida (IF/ELSE, sin SQL dinámico).
   if p_serie = 'estado' then
     return query
       select v.estado::text, count(*)::bigint, null::numeric
-      from base v group by v.estado
+      from public.v_reportes_incidencias v
+      where (p_desde is null or v.fecha_reporte::date >= p_desde)
+        and (p_hasta is null or v.fecha_reporte::date <= p_hasta)
+        and (p_sede_id is null or v.sede_id = p_sede_id)
+        and (p_area_id is null or v.area_id = p_area_id)
+        and (p_estado is null or v.estado = p_estado)
+        and (p_prioridad is null or v.prioridad = p_prioridad)
+        and (p_tipo is null or v.tipo = p_tipo)
+      group by v.estado
       order by 2 desc, 1 asc limit p_limite;
-  -- Prioridad
   elsif p_serie = 'prioridad' then
     return query
       select v.prioridad::text, count(*)::bigint, null::numeric
-      from base v group by v.prioridad
+      from public.v_reportes_incidencias v
+      where (p_desde is null or v.fecha_reporte::date >= p_desde)
+        and (p_hasta is null or v.fecha_reporte::date <= p_hasta)
+        and (p_sede_id is null or v.sede_id = p_sede_id)
+        and (p_area_id is null or v.area_id = p_area_id)
+        and (p_estado is null or v.estado = p_estado)
+        and (p_prioridad is null or v.prioridad = p_prioridad)
+        and (p_tipo is null or v.tipo = p_tipo)
+      group by v.prioridad
       order by 2 desc, 1 asc limit p_limite;
-  -- Tipo de incidencia
   elsif p_serie = 'tipo' then
     return query
       select v.tipo::text, count(*)::bigint, null::numeric
-      from base v group by v.tipo
+      from public.v_reportes_incidencias v
+      where (p_desde is null or v.fecha_reporte::date >= p_desde)
+        and (p_hasta is null or v.fecha_reporte::date <= p_hasta)
+        and (p_sede_id is null or v.sede_id = p_sede_id)
+        and (p_area_id is null or v.area_id = p_area_id)
+        and (p_estado is null or v.estado = p_estado)
+        and (p_prioridad is null or v.prioridad = p_prioridad)
+        and (p_tipo is null or v.tipo = p_tipo)
+      group by v.tipo
       order by 2 desc, 1 asc limit p_limite;
-  -- Área responsable vigente (derivación activa)
   elsif p_serie = 'area' then
     return query
       select coalesce(v.area, 'Sin asignar')::text, count(*)::bigint,
              null::numeric
-      from base v group by v.area
+      from public.v_reportes_incidencias v
+      where (p_desde is null or v.fecha_reporte::date >= p_desde)
+        and (p_hasta is null or v.fecha_reporte::date <= p_hasta)
+        and (p_sede_id is null or v.sede_id = p_sede_id)
+        and (p_area_id is null or v.area_id = p_area_id)
+        and (p_estado is null or v.estado = p_estado)
+        and (p_prioridad is null or v.prioridad = p_prioridad)
+        and (p_tipo is null or v.tipo = p_tipo)
+      group by v.area
       order by 2 desc, 1 asc limit p_limite;
-  -- Ambiente
   elsif p_serie = 'ambiente' then
     return query
       select v.ambiente::text, count(*)::bigint, null::numeric
-      from base v group by v.ambiente
+      from public.v_reportes_incidencias v
+      where (p_desde is null or v.fecha_reporte::date >= p_desde)
+        and (p_hasta is null or v.fecha_reporte::date <= p_hasta)
+        and (p_sede_id is null or v.sede_id = p_sede_id)
+        and (p_area_id is null or v.area_id = p_area_id)
+        and (p_estado is null or v.estado = p_estado)
+        and (p_prioridad is null or v.prioridad = p_prioridad)
+        and (p_tipo is null or v.tipo = p_tipo)
+      group by v.ambiente
       order by 2 desc, 1 asc limit p_limite;
-  -- Sede
   elsif p_serie = 'sede' then
     return query
       select v.sede::text, count(*)::bigint, null::numeric
-      from base v group by v.sede
+      from public.v_reportes_incidencias v
+      where (p_desde is null or v.fecha_reporte::date >= p_desde)
+        and (p_hasta is null or v.fecha_reporte::date <= p_hasta)
+        and (p_sede_id is null or v.sede_id = p_sede_id)
+        and (p_area_id is null or v.area_id = p_area_id)
+        and (p_estado is null or v.estado = p_estado)
+        and (p_prioridad is null or v.prioridad = p_prioridad)
+        and (p_tipo is null or v.tipo = p_tipo)
+      group by v.sede
       order by 2 desc, 1 asc limit p_limite;
-  -- Pabellón (con sede si el filtro no acota a una)
   elsif p_serie = 'pabellon' then
     return query
       select (case when p_sede_id is null then v.sede || ' · ' else '' end)
                || v.pabellon::text, count(*)::bigint, null::numeric
-      from base v group by v.sede, v.pabellon
+      from public.v_reportes_incidencias v
+      where (p_desde is null or v.fecha_reporte::date >= p_desde)
+        and (p_hasta is null or v.fecha_reporte::date <= p_hasta)
+        and (p_sede_id is null or v.sede_id = p_sede_id)
+        and (p_area_id is null or v.area_id = p_area_id)
+        and (p_estado is null or v.estado = p_estado)
+        and (p_prioridad is null or v.prioridad = p_prioridad)
+        and (p_tipo is null or v.tipo = p_tipo)
+      group by v.sede, v.pabellon
       order by 2 desc, 1 asc limit p_limite;
-  -- Piso (con pabellón)
   elsif p_serie = 'piso' then
     return query
       select (case when p_sede_id is null then v.pabellon || ' · ' else '' end)
                || v.piso::text, count(*)::bigint, null::numeric
-      from base v group by v.pabellon, v.piso
+      from public.v_reportes_incidencias v
+      where (p_desde is null or v.fecha_reporte::date >= p_desde)
+        and (p_hasta is null or v.fecha_reporte::date <= p_hasta)
+        and (p_sede_id is null or v.sede_id = p_sede_id)
+        and (p_area_id is null or v.area_id = p_area_id)
+        and (p_estado is null or v.estado = p_estado)
+        and (p_prioridad is null or v.prioridad = p_prioridad)
+        and (p_tipo is null or v.tipo = p_tipo)
+      group by v.pabellon, v.piso
       order by 2 desc, 1 asc limit p_limite;
-  -- Equipo (mayor número de incidencias — §48)
   elsif p_serie = 'equipo' then
     return query
       select coalesce(v.equipo_codigo, 'Sin equipo')::text, count(*)::bigint,
              null::numeric
-      from base v group by v.equipo_codigo
+      from public.v_reportes_incidencias v
+      where (p_desde is null or v.fecha_reporte::date >= p_desde)
+        and (p_hasta is null or v.fecha_reporte::date <= p_hasta)
+        and (p_sede_id is null or v.sede_id = p_sede_id)
+        and (p_area_id is null or v.area_id = p_area_id)
+        and (p_estado is null or v.estado = p_estado)
+        and (p_prioridad is null or v.prioridad = p_prioridad)
+        and (p_tipo is null or v.tipo = p_tipo)
+      group by v.equipo_codigo
       order by 2 desc, 1 asc limit p_limite;
-  -- Categoría de equipo
   elsif p_serie = 'categoria' then
     return query
       select coalesce(v.equipo_categoria, 'Sin equipo')::text, count(*)::bigint,
              null::numeric
-      from base v group by v.equipo_categoria
+      from public.v_reportes_incidencias v
+      where (p_desde is null or v.fecha_reporte::date >= p_desde)
+        and (p_hasta is null or v.fecha_reporte::date <= p_hasta)
+        and (p_sede_id is null or v.sede_id = p_sede_id)
+        and (p_area_id is null or v.area_id = p_area_id)
+        and (p_estado is null or v.estado = p_estado)
+        and (p_prioridad is null or v.prioridad = p_prioridad)
+        and (p_tipo is null or v.tipo = p_tipo)
+      group by v.equipo_categoria
       order by 2 desc, 1 asc limit p_limite;
-  -- Evolución mensual (America/Lima): AAAA-MM
   elsif p_serie = 'mes' then
     return query
       select to_char(v.fecha_reporte at time zone 'America/Lima', 'YYYY-MM')::text,
              count(*)::bigint, null::numeric
-      from base v
+      from public.v_reportes_incidencias v
+      where (p_desde is null or v.fecha_reporte::date >= p_desde)
+        and (p_hasta is null or v.fecha_reporte::date <= p_hasta)
+        and (p_sede_id is null or v.sede_id = p_sede_id)
+        and (p_area_id is null or v.area_id = p_area_id)
+        and (p_estado is null or v.estado = p_estado)
+        and (p_prioridad is null or v.prioridad = p_prioridad)
+        and (p_tipo is null or v.tipo = p_tipo)
       group by to_char(v.fecha_reporte at time zone 'America/Lima', 'YYYY-MM')
       order by 1 asc limit p_limite;
-  -- Tiempo de atención por SERVICIO (§47): extra = promedio de horas
   elsif p_serie = 'servicio_atencion' then
     return query
       select v.servicio::text, count(*)::bigint,
              round(avg(v.horas_resolucion_real - v.horas_respuesta_real)
                    ::numeric, 1)
-      from base v
-      where v.servicio is not null
+      from public.v_reportes_incidencias v
+      where (p_desde is null or v.fecha_reporte::date >= p_desde)
+        and (p_hasta is null or v.fecha_reporte::date <= p_hasta)
+        and (p_sede_id is null or v.sede_id = p_sede_id)
+        and (p_area_id is null or v.area_id = p_area_id)
+        and (p_estado is null or v.estado = p_estado)
+        and (p_prioridad is null or v.prioridad = p_prioridad)
+        and (p_tipo is null or v.tipo = p_tipo)
+        and v.servicio is not null
       group by v.servicio
       order by 2 desc, 1 asc limit p_limite;
   else

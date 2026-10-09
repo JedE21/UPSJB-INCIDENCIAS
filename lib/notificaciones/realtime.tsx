@@ -123,7 +123,9 @@ export function ProveedorNotificacionesRealtime({
           if (estadoCanal === "SUBSCRIBED") {
             refEstado.current = "conectado";
             setEstado("conectado");
-            reintentos = 0;
+            // Al (re)conectar, señal para refrescar la bandeja del servidor:
+            // pudo perderse un INSERT durante la desconexión.
+            setVersion((v) => v + 1);
           } else if (estadoCanal === "CHANNEL_ERROR") {
             refEstado.current = "error";
             setEstado("error");
@@ -140,18 +142,25 @@ export function ProveedorNotificacionesRealtime({
 
     canal = suscribir();
 
-    // RECONEXIÓN propia con backoff (complementa la de la librería): si el
-    // canal quedó cerrado/erróneo, re-suscribe tras esperar progresivamente.
-    // Lee el estado por referencia (siempre fresco), no del closure.
+    // RECONEXIÓN con backoff exponencial complementario al de la librería:
+    // re-suscribe SOLO cuando el canal no está conectado (evita duplicados) y
+    // respeta la espera completa de la librería antes de forzar una nueva.
+    let intento = 0;
     const temporizador = setInterval(() => {
       if (cancelado) return;
-      if (refEstado.current === "conectado") return;
-      reintentos += 1;
-      if (reintentos % 5 === 0) {
-        if (canal) supabase.removeChannel(canal);
-        canal = suscribir();
+      if (refEstado.current === "conectado") {
+        intento = 0; // reset al recuperar conexión
+        return;
       }
-    }, 15_000);
+      intento += 1;
+      // Re-suscribe cada 30 s mientras esté caído; WhatsApp del canal viejo:
+      // removeChannel limpia el socket antes de crear el nuevo (sin fugas).
+      if (canal) {
+        supabase.removeChannel(canal);
+        canal = null;
+      }
+      canal = suscribir();
+    }, 30_000);
 
     return () => {
       cancelado = true;

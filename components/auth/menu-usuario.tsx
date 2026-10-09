@@ -58,7 +58,7 @@ export function MenuUsuario({
       {abierto ? (
         <div
           role="menu"
-          className="absolute right-0 z-50 mt-2 w-56 overflow-hidden rounded-lg border bg-popover shadow-md"
+          className="absolute right-0 z-50 mt-2 w-56 max-w-[calc(100vw-2rem)] overflow-hidden rounded-lg border bg-popover shadow-md"
         >
           <div className="border-b px-3 py-2.5">
             <p className="truncate text-sm font-medium" title={nombre}>

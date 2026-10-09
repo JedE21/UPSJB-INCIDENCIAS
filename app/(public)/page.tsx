@@ -6,9 +6,9 @@ import {
   Info,
   MapPin,
   QrCode,
-  ShieldCheck,
 } from "lucide-react";
 import { FadeIn } from "@/components/motion/fade-in";
+import { LogoUpsjb } from "@/components/layout/logo-upsjb";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { siteConfig } from "@/lib/site";
@@ -36,23 +36,23 @@ export default function HomePage() {
     <div className="flex flex-col">
       {/* Hero — concepto §27 del Plan Maestro */}
       <section className="relative overflow-hidden border-b bg-gradient-to-b from-primary/5 to-transparent">
-        <div className="mx-auto flex max-w-6xl flex-col items-center gap-6 px-4 py-20 text-center sm:py-28">
+        <div className="mx-auto flex max-w-6xl flex-col items-center gap-6 px-seguro py-14 text-center sm:py-20 md:py-28">
+          {/* Logo institucional: elemento principal del hero (§26/§27 del
+              Plan Maestro — concepto aprobado del mockup). */}
           <FadeIn>
-            <div className="flex size-20 items-center justify-center rounded-2xl border bg-card shadow-sm">
-              <ShieldCheck className="size-10 text-primary" aria-hidden />
-            </div>
+            <LogoUpsjb className="h-16 sm:h-20" />
           </FadeIn>
 
           <FadeIn delay={0.05}>
             <p className="text-sm font-medium uppercase tracking-widest text-muted-foreground">
-              {siteConfig.institution} · {siteConfig.branch}
+              {siteConfig.institution}
             </p>
           </FadeIn>
 
           <FadeIn delay={0.1}>
             <h1 className="max-w-2xl text-balance text-4xl font-bold tracking-tight sm:text-5xl">
               {siteConfig.title}
-              <span className="block text-primary">{siteConfig.name}</span>
+              <span className="block text-primary">{siteConfig.branch}</span>
             </h1>
           </FadeIn>
 
@@ -89,7 +89,7 @@ export default function HomePage() {
       </section>
 
       {/* Cómo funciona — sección QR */}
-      <section className="mx-auto w-full max-w-6xl px-4 py-16">
+      <section className="mx-auto w-full max-w-6xl px-seguro py-16">
         <FadeIn>
           <h2 className="text-center text-2xl font-semibold tracking-tight sm:text-3xl">
             ¿Cómo funciona?
@@ -119,7 +119,7 @@ export default function HomePage() {
 
       {/* Ubicación automática por QR */}
       <section className="border-t bg-muted/40">
-        <div className="mx-auto grid max-w-6xl items-center gap-8 px-4 py-16 md:grid-cols-2">
+        <div className="mx-auto grid max-w-6xl items-center gap-8 px-seguro py-16 md:grid-cols-2">
           <FadeIn>
             <div>
               <h2 className="text-2xl font-semibold tracking-tight">

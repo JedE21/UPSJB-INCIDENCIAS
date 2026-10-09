@@ -3,10 +3,11 @@
 import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Menu, ShieldCheck, X } from "lucide-react";
+import { Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { MenuUsuario } from "@/components/auth/menu-usuario";
 import { loginNavItem, publicNav } from "@/lib/navigation";
+import { LogoUpsjb } from "@/components/layout/logo-upsjb";
 import { siteConfig } from "@/lib/site";
 import { cn } from "@/lib/utils";
 
@@ -21,14 +22,11 @@ export function SiteHeader({
 
   return (
     <header className="sticky top-0 z-40 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80">
-      <div className="mx-auto flex h-14 max-w-6xl items-center gap-4 px-4">
-        <Link href="/" className="flex items-center gap-2">
-          <span className="flex size-8 items-center justify-center rounded-lg bg-primary/10">
-            <ShieldCheck className="size-5 text-primary" aria-hidden />
-          </span>
-          <span className="flex flex-col leading-none">
-            <span className="font-semibold">{siteConfig.name}</span>
-            <span className="text-xs text-muted-foreground">{siteConfig.branch}</span>
+      <div className="mx-auto flex h-14 max-w-6xl items-center gap-2 px-seguro sm:gap-4">
+        <Link href="/" className="flex items-center gap-2" aria-label="Inicio">
+          <LogoUpsjb className="h-9" />
+          <span className="sr-only">
+            {siteConfig.name} — {siteConfig.institution}
           </span>
         </Link>
 
@@ -85,7 +83,7 @@ export function SiteHeader({
 
       {open && (
         <nav
-          className="border-t bg-background px-4 py-3 md:hidden"
+          className="border-t bg-background px-seguro pb-seguro pt-3 md:hidden"
           aria-label="Navegación principal móvil"
         >
           <ul className="flex flex-col gap-1">

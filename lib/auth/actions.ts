@@ -80,9 +80,22 @@ export async function iniciarSesion(
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  const roles = Array.isArray(user?.app_metadata?.roles)
+  let roles: string[] = Array.isArray(user?.app_metadata?.roles)
     ? (user!.app_metadata.roles as string[])
     : [];
+
+  // Fallback: si el Custom Access Token Hook aún no inyecta el claim `roles`
+  // en el JWT, consultar usuarios_roles vía RLS (la BD es la fuente de verdad;
+  // misma lógica que getSesion en lib/auth/session.ts).
+  if (roles.length === 0 && user?.id) {
+    const { data: filasRoles } = await supabase
+      .from("usuarios_roles")
+      .select("roles(nombre)")
+      .eq("perfil_id", user.id);
+    roles = (filasRoles ?? [])
+      .map((f) => (f as { roles?: { nombre?: string } | null }).roles?.nombre)
+      .filter((n): n is string => Boolean(n));
+  }
 
   // redirect() lanza una excepción interna: no va dentro de try/catch.
   redirect(siguiente ?? homeDeRoles(roles));

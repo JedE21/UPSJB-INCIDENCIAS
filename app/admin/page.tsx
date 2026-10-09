@@ -237,10 +237,10 @@ export default async function AdminDashboardPage() {
                 <li key={i.id}>
                   <Link
                     href={`/seguimiento?codigo=${encodeURIComponent(i.codigo)}`}
-                    className="flex flex-wrap items-center gap-2 rounded-lg border bg-muted/30 px-3 py-2 text-sm transition-colors hover:bg-accent/40"
+                    className="flex flex-wrap items-center gap-x-2 gap-y-1 rounded-lg border bg-muted/30 px-3 py-2 text-sm transition-colors hover:bg-accent/40"
                   >
                     <span className="font-mono text-xs font-semibold">{i.codigo}</span>
-                    <span className="min-w-0 flex-1 truncate">{i.ambiente} — {i.descripcion}</span>
+                    <span className="min-w-0 flex-1 basis-40 truncate">{i.ambiente} — {i.descripcion}</span>
                     <span className="text-xs text-muted-foreground">{fechaHora(i.fecha_reporte)}</span>
                     <PriorityBadge prioridad={i.prioridad} />
                     <StatusBadge estado={i.estado} />

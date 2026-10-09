@@ -72,7 +72,7 @@ const preguntas = [
  */
 export default function InformacionPage() {
   return (
-    <div className="mx-auto w-full max-w-4xl py-8">
+    <div className="px-seguro mx-auto w-full max-w-4xl py-8">
       <PageHeader
         icon={Info}
         title="Información"

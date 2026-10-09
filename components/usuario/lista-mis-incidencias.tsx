@@ -2,13 +2,12 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { CalendarDays, DoorOpen, FileSearch } from "lucide-react";
+import { CalendarDays, DoorOpen, FileSearch, ListFilter, X } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Select } from "@/components/ui/select";
 import { StatusBadge } from "@/components/incidencias/badges";
 import { EmptyState } from "@/components/shared/empty-state";
 import { SearchInput } from "@/components/shared/search-input";
-import { FilterBar } from "@/components/shared/filter-bar";
 import { fechaCorta } from "@/lib/fechas";
 import type { IncidenciaResumen } from "@/lib/incidencias/tipos";
 
@@ -40,32 +39,61 @@ export function ListaMisIncidencias({ incidencias }: { incidencias: IncidenciaRe
     return coincideEstado && coincideTexto;
   });
 
+  const hayFiltros = busqueda.trim() !== "" || estado !== "todas";
+  const limpiarFiltros = () => {
+    setBusqueda("");
+    setEstado("todas");
+  };
+
   return (
     <div className="flex flex-col gap-4">
-      <FilterBar
-        search={
+      {/* Toolbar de filtros: panel de vidrio coherente con el fondo del
+          apartado; el contador usa la tipografía técnica del sistema. */}
+      <div className="rounded-xl border border-border/60 bg-card/70 shadow-sm backdrop-blur-md">
+        <div className="flex flex-col gap-3 p-3 sm:flex-row sm:items-center">
           <SearchInput
             value={busqueda}
             onChange={setBusqueda}
             placeholder="Buscar por código, ambiente o problema…"
-            className="sm:w-72"
+            className="sm:flex-1 sm:max-w-none"
           />
-        }
-        filters={
-          <Select
-            value={estado}
-            onChange={(e) => setEstado(e.target.value)}
-            aria-label="Filtrar por estado"
-            className="w-48"
+          <div className="flex items-center gap-2">
+            <ListFilter className="size-4 shrink-0 text-muted-foreground" aria-hidden />
+            <Select
+              value={estado}
+              onChange={(e) => setEstado(e.target.value)}
+              aria-label="Filtrar por estado"
+              className="w-full sm:w-48"
+            >
+              {OPCIONES_ESTADO.map((o) => (
+                <option key={o.value} value={o.value}>
+                  {o.label}
+                </option>
+              ))}
+            </Select>
+          </div>
+        </div>
+        <div className="flex flex-wrap items-center justify-between gap-2 border-t border-border/60 px-3 py-2">
+          <p
+            role="status"
+            aria-live="polite"
+            className="font-tecnica text-[11px] uppercase tracking-[0.14em] text-muted-foreground"
           >
-            {OPCIONES_ESTADO.map((o) => (
-              <option key={o.value} value={o.value}>
-                {o.label}
-              </option>
-            ))}
-          </Select>
-        }
-      />
+            Mostrando {filtradas.length} de {incidencias.length}{" "}
+            {incidencias.length === 1 ? "incidencia" : "incidencias"}
+          </p>
+          {hayFiltros ? (
+            <button
+              type="button"
+              onClick={limpiarFiltros}
+              className="flex items-center gap-1 rounded-md px-2 py-1 text-xs text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+            >
+              <X className="size-3.5" aria-hidden />
+              Limpiar filtros
+            </button>
+          ) : null}
+        </div>
+      </div>
 
       {filtradas.length > 0 ? (
         <ul className="flex flex-col gap-3" aria-label="Listado de mis incidencias">

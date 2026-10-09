@@ -67,7 +67,7 @@ export default async function SeguimientoPage({ searchParams }: Props) {
   const sla = incidencia ? await obtenerDetalleSla(incidencia.id) : null;
 
   return (
-    <div className="relative mx-auto w-full max-w-2xl py-8">
+    <div className="px-seguro relative mx-auto w-full max-w-2xl py-8">
       <div className="aurora-fondo" aria-hidden />
       <PageHeader
         icon={FileSearch}

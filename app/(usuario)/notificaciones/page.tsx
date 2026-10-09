@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { redirect } from "next/navigation";
 import { Bell } from "lucide-react";
 import { PageHeader } from "@/components/shared/page-header";
 import { CentroNotificaciones } from "@/components/notificaciones/centro-notificaciones";
@@ -7,6 +8,7 @@ import {
   listarPreferencias,
   EVENTOS_NOTIFICACION,
 } from "@/lib/notificaciones/datos";
+import { getSesion } from "@/lib/auth/session";
 
 export const metadata: Metadata = { title: "Notificaciones" };
 
@@ -15,8 +17,14 @@ export const metadata: Metadata = { title: "Notificaciones" };
  * La bandeja viene de la tabla `notificaciones` del usuario autenticado
  * (RPC 0018/RLS); las preferencias son opt-out por evento. La lista se
  * refresca sola con Realtime (provider montado en el layout).
+ *
+ * El ADMINISTRADOR usa /admin/notificaciones: aquí se redirige para no
+ * duplicar el módulo en dos paneles.
  */
 export default async function NotificacionesPage() {
+  const sesion = await getSesion();
+  if (sesion?.roles.includes("ADMINISTRADOR")) redirect("/admin/notificaciones");
+
   const [notificaciones, preferenciasGuardadas] = await Promise.all([
     listarNotificaciones({ limite: 50 }),
     listarPreferencias(),

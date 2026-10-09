@@ -4,6 +4,7 @@ import { Breadcrumbs } from "@/components/shared/breadcrumbs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { TablaEntidad } from "@/components/admin/tabla-entidad";
 import { entidadPorSlug, GRUPOS_ADMIN, type EntidadAdmin } from "@/lib/admin/entidades";
+import { cn } from "@/lib/utils";
 import {
   listarEntidad,
   cargarReferencias,
@@ -36,16 +37,20 @@ function Pestanas({ grupo, activo }: { grupo: keyof typeof GRUPOS_ADMIN; activo:
   if (entidades.length === 0) return null;
 
   return (
-    <nav aria-label={`Secciones de ${definicion.titulo}`} className="flex flex-wrap gap-2">
+    <nav
+      aria-label={`Secciones de ${definicion.titulo}`}
+      className="-mx-4 flex max-w-full gap-2 overflow-x-auto px-4 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+    >
       {entidades.map((e) => (
         <Link
           key={e.slug}
           href={`/admin/${grupo}/${e.slug}`}
-          className={
+          className={cn(
+            "shrink-0 rounded-full border px-4 py-1.5 text-sm font-medium transition-colors",
             e.slug === activo
-              ? "rounded-full border border-primary/30 bg-primary/10 px-4 py-1.5 text-sm font-medium text-primary"
-              : "rounded-full border px-4 py-1.5 text-sm text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
-          }
+              ? "border-primary/30 bg-primary/10 text-primary"
+              : "text-muted-foreground hover:bg-accent hover:text-foreground"
+          )}
           aria-current={e.slug === activo ? "page" : undefined}
         >
           {e.titulo}

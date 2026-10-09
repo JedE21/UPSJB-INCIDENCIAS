@@ -140,8 +140,9 @@ export async function proxy(request: NextRequest) {
   if (regla && user && roles.length > 0) {
     // Con claim `roles` disponible: si el panel del usuario es otro → aviso.
     // (Sin claim, no bloquear aquí: los layouts revalidan con getUser() + BD.)
+    // El ADMINISTRADOR tiene acceso total: no se le restringe el panel.
     const panelDe = panelDeRoles(roles);
-    if (panelDe !== regla.panel) {
+    if (panelDe !== regla.panel && !roles.includes("ADMINISTRADOR")) {
       const url = request.nextUrl.clone();
       url.pathname = "/acceso-restringido";
       url.search = `?panel=${encodeURIComponent(panelDe)}`;

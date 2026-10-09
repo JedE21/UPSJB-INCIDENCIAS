@@ -2,8 +2,9 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { ArrowLeft, ShieldCheck } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import type { ReactNode } from "react";
+import { LogoUpsjb } from "@/components/layout/logo-upsjb";
 import { contextNav, type AppContext } from "@/lib/navigation";
 import { siteConfig } from "@/lib/site";
 import { cn } from "@/lib/utils";
@@ -13,31 +14,34 @@ type PanelContext = Exclude<AppContext, "public">;
 export function PanelHeader({
   context,
   children,
+  /** El panel admin usa sidebar a la izquierda: header solo en móvil. */
+  conSidebar = false,
 }: {
   context: PanelContext;
   /** Acciones a la derecha (menú de usuario / sesión). */
   children?: ReactNode;
+  conSidebar?: boolean;
 }) {
   const pathname = usePathname();
   const items = contextNav[context];
 
   return (
     <header className="sticky top-0 z-40 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80">
-      <div className="mx-auto flex h-14 max-w-6xl items-center gap-4 px-4">
+      <div className="mx-auto flex h-14 max-w-6xl items-center gap-2 px-seguro sm:gap-4">
         <Link
           href="/"
           className="flex items-center gap-2 text-muted-foreground transition-colors hover:text-foreground"
           aria-label="Volver al inicio"
         >
           <ArrowLeft className="size-4" aria-hidden />
-          <ShieldCheck className="size-5 text-primary" aria-hidden />
-          <span className="hidden font-semibold text-foreground sm:inline">
-            {siteConfig.name}
-          </span>
+          <LogoUpsjb className="hidden h-8 sm:block" />
         </Link>
 
         <nav
-          className="ml-auto hidden items-center gap-1 md:flex"
+          className={cn(
+            "ml-auto hidden items-center gap-1 md:flex",
+            conSidebar && "lg:hidden"
+          )}
           aria-label={`Navegación ${context}`}
         >
           {items.map((item) => {
@@ -71,7 +75,7 @@ export function PanelHeader({
       </div>
 
       <nav className="overflow-x-auto border-t md:hidden" aria-label={`Navegación ${context} móvil`}>
-        <div className="mx-auto flex max-w-6xl items-center gap-1 px-4 py-2">
+        <div className="mx-auto flex max-w-6xl items-center gap-1 px-seguro py-2">
           {items.map((item) => {
             const active = item.exact
               ? pathname === item.href

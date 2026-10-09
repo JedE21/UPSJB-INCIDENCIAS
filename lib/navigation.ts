@@ -62,6 +62,8 @@ export const contextNav: Record<
   admin: [
     { href: "/admin", label: "Dashboard", icon: LayoutDashboard, exact: true },
     { href: "/admin/incidencias", label: "Incidencias", icon: ClipboardList },
+    { href: "/admin/mis-incidencias", label: "Mis incidencias", icon: ClipboardList },
+    { href: "/admin/notificaciones", label: "Notificaciones", icon: Bell },
     { href: "/admin/usuarios", label: "Usuarios", icon: Users },
     { href: "/admin/roles", label: "Roles y permisos", icon: ShieldCheck },
     { href: "/admin/infraestructura", label: "Infraestructura", icon: Building2 },
@@ -72,6 +74,7 @@ export const contextNav: Record<
     { href: "/admin/ui", label: "Catálogo UI", icon: Palette },
     { href: "/admin/reportes", label: "Reportes", icon: BarChart3 },
     { href: "/admin/auditoria", label: "Auditoría", icon: ScrollText },
+    { href: "/admin/perfil", label: "Mi perfil", icon: User },
   ],
 };
 

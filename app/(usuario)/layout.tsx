@@ -1,4 +1,5 @@
 import { PanelShell } from "@/components/layout/panel-shell";
+import { FondoPanelUsuario } from "@/components/layout/fondo-panel";
 import { PuertaRealtime } from "@/components/notificaciones/puerta-realtime";
 import { exigirPanel } from "@/lib/auth/session";
 import { nombreCompleto } from "@/lib/auth/types";
@@ -21,6 +22,8 @@ export default async function UsuarioLayout({
       usuarioId={sesion.usuarioId}
       rutasRefresco={["/notificaciones", "/mis-incidencias"]}
     >
+      {/* Fondo compartido por todo el panel usuario (fijos a viewport). */}
+      <FondoPanelUsuario />
       <PanelShell
         context="usuario"
         sesion={{

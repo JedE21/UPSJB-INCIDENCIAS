@@ -29,7 +29,7 @@ export const metadata: Metadata = {
  */
 export default function ReportarPage() {
   return (
-    <div className="relative mx-auto w-full max-w-2xl py-8">
+    <div className="px-seguro relative mx-auto w-full max-w-2xl py-8">
       <div className="aurora-fondo" aria-hidden />
 
       <PageHeader

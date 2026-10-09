@@ -121,7 +121,9 @@ export function DataTable<T>({
 
   return (
     <div className={cn("flex flex-col gap-3", className)}>
-      {buscable ? <SearchInput value={busqueda} onChange={setBusqueda} placeholder={placeholderBusqueda} /> : null}
+      {buscable ? (
+        <SearchInput value={busqueda} onChange={setBusqueda} placeholder={placeholderBusqueda} className="max-w-full sm:max-w-xs" />
+      ) : null}
 
       <Table>
         <TableHeader>

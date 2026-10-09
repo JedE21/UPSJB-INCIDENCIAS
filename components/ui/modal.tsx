@@ -92,7 +92,7 @@ export function Modal({
             aria-describedby={description ? idDescripcion : undefined}
             tabIndex={-1}
             className={cn(
-              "w-full rounded-xl border bg-card p-6 shadow-lg focus-visible:outline-none",
+              "max-h-[calc(100dvh-2rem)] w-full overflow-y-auto overscroll-contain rounded-xl border bg-card p-6 shadow-lg focus-visible:outline-none",
               anchos[size]
             )}
             onClick={(e) => e.stopPropagation()}

@@ -56,11 +56,18 @@ export const getSesion = cache(async (): Promise<SesionActual | null> => {
       .filter((n): n is string => Boolean(n));
   }
 
-  const { data: perfil } = await supabase
-    .from("perfiles")
-    .select("*")
-    .eq("id", user.id)
-    .maybeSingle<Perfil>();
+  // Perfil desde public.perfiles. La fila SIEMPRE existe para usuarios
+  // registrados (trigger register_new_user): si llega null puede ser un fallo
+  // transitorio (cambio de JWT/claim, réplica, refresh), así que se reintenta
+  // una vez antes de reportar null — evita el falso "perfil no creado".
+  const leerPerfil = () =>
+    supabase.from("perfiles").select("*").eq("id", user.id).maybeSingle<Perfil>();
+
+  let perfilResultado = await leerPerfil();
+  if (!perfilResultado.data) {
+    perfilResultado = await leerPerfil();
+  }
+  const perfil = perfilResultado.data;
 
   return {
     usuarioId: user.id,
@@ -96,6 +103,7 @@ export const tienePermiso = cache(async (permiso: string): Promise<boolean> => {
 /**
  * Guard de layout: exige sesión + perfil activo + pertenecer al panel.
  * La redirección por rol manda al usuario al home de SU panel de mayor jerarquía.
+ * EXCEPCIÓN: el ADMINISTRADOR puede visitar cualquier panel (acceso total).
  */
 export const exigirPanel = cache(async (panel: Panel): Promise<SesionActual> => {
   const sesion = await getSesionObligatoria();
@@ -104,8 +112,9 @@ export const exigirPanel = cache(async (panel: Panel): Promise<SesionActual> => 
     redirect("/cuenta-suspendida");
   }
 
+  const esAdmin = sesion.roles.includes("ADMINISTRADOR");
   const panelActual = panelDeRoles(sesion.roles);
-  if (panelActual !== panel) {
+  if (panelActual !== panel && !esAdmin) {
     redirect("/acceso-restringido?panel=" + panelActual);
   }
 

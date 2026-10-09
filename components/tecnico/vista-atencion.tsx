@@ -126,7 +126,7 @@ export function VistaAtencionTecnico({
       <Card>
         <CardHeader>
           <div className="flex flex-wrap items-center justify-between gap-2">
-            <CardTitle className="font-mono text-xl">{incidencia.codigo}</CardTitle>
+            <CardTitle className="break-all font-mono text-lg sm:text-xl">{incidencia.codigo}</CardTitle>
             <div className="flex flex-wrap items-center gap-2">
               <StatusBadge estado={incidencia.estado} />
               <PriorityBadge prioridad={incidencia.prioridad} />

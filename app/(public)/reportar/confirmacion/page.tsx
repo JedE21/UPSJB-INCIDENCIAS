@@ -59,7 +59,7 @@ export default async function ConfirmacionReportePage({ searchParams }: Props) {
   const mostrarExito = Boolean(verificada);
 
   return (
-    <div className="mx-auto w-full max-w-2xl py-8">
+    <div className="px-seguro mx-auto w-full max-w-2xl py-8">
       {mostrarExito ? (
         <>
           <FadeIn>
@@ -81,7 +81,7 @@ export default async function ConfirmacionReportePage({ searchParams }: Props) {
                 <CardDescription>Código de incidencia</CardDescription>
                 <div className="flex flex-wrap items-center justify-center gap-2">
                   <CardTitle
-                    className="select-all font-mono text-3xl tracking-wide"
+                    className="select-all break-all font-mono text-2xl tracking-wide sm:text-3xl"
                     aria-label={`Código de incidencia ${codigoLimpio}`}
                   >
                     {codigoLimpio}

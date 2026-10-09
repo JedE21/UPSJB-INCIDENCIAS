@@ -29,8 +29,8 @@
 --    activa? (máquina de estados del modelo; single source of truth en BD)
 -- ----------------------------------------------------------------------------
 create or replace function public.transicion_tecnico_valida(
-  p_de nombre,
-  p_a  nombre
+  p_de text,
+  p_a  text
 )
 returns boolean
 language sql
@@ -145,7 +145,7 @@ begin
     raise exception 'Estado "% no existe en el catálogo del sistema', p_nuevo_estado;
   end if;
 
-  if not public.transicion_tecnico_valida(v_actual::nombre, p_nuevo_estado::nombre) then
+  if not public.transicion_tecnico_valida(v_actual::text, p_nuevo_estado::text) then
     raise exception 'Transición no permitida: % → %', v_actual, p_nuevo_estado;
   end if;
 
@@ -312,7 +312,7 @@ begin
 
   v_texto := btrim(p_accion);
   if v_previas is not null and btrim(v_previas) <> '' then
-    v_texto := v_previas || char(10) || to_char(now(), 'DD/MM HH24:MI') || ' · ' || v_texto;
+    v_texto := v_previas || chr(10) || to_char(now(), 'DD/MM HH24:MI') || ' · ' || v_texto;
   else
     v_texto := to_char(now(), 'DD/MM HH24:MI') || ' · ' || v_texto;
   end if;

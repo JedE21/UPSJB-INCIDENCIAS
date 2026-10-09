@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { siteConfig } from "@/lib/site";
 import { ToastProvider } from "@/components/ui/toast";
 import "./globals.css";
@@ -13,6 +13,10 @@ export const metadata: Metadata = {
   },
   description: siteConfig.description,
   applicationName: siteConfig.name,
+  icons: {
+    icon: [{ url: "/favicon.png", type: "image/png" }],
+    apple: "/favicon.png",
+  },
   // Páginas privadas por defecto no indexables; robots.ts afina lo público.
   robots: {
     index: false,
@@ -25,6 +29,19 @@ export const metadata: Metadata = {
     description: siteConfig.description,
     locale: "es_PE",
   },
+};
+
+/**
+ * Viewport móvil (Next 16): 100 dvh corrige el salto del 100vh en móviles
+ * (barra del navegador), viewportFit=cover habilita el uso de las safe-area
+ * insets (notch / barra inferior de gestos) y themeColor pinta la barra del
+ * navegador con el fondo institucional.
+ */
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
+  themeColor: "#0a0606",
 };
 
 export default function RootLayout({

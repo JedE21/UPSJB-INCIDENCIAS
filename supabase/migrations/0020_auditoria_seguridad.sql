@@ -207,15 +207,22 @@ $$;
 
 -- La tabla auth.users_sessions pertenece a supabase_auth_admin; el trigger
 -- se instala como security definer dueño de postgres (permite leer esa fila).
-drop trigger if exists trg_sesiones_login on auth.users_sessions;
-create trigger trg_sesiones_login
-  after insert on auth.users_sessions
-  for each row execute function public.auditar_sesion_nueva();
+-- NOTA: no todas las versiones del esquema Auth exponen users_sessions; si no
+-- existe, la auditoría de login/logout por trigger se omite sin fallar.
+do $$
+begin
+  if to_regclass('auth.users_sessions') is not null then
+    drop trigger if exists trg_sesiones_login on auth.users_sessions;
+    create trigger trg_sesiones_login
+      after insert on auth.users_sessions
+      for each row execute function public.auditar_sesion_nueva();
 
-drop trigger if exists trg_sesiones_logout on auth.users_sessions;
-create trigger trg_sesiones_logout
-  after delete on auth.users_sessions
-  for each row execute function public.auditar_logout();
+    drop trigger if exists trg_sesiones_logout on auth.users_sessions;
+    create trigger trg_sesiones_logout
+      after delete on auth.users_sessions
+      for each row execute function public.auditar_logout();
+  end if;
+end $$;
 
 -- ----------------------------------------------------------------------------
 -- 4. AUDITORÍA EN EL FLUJO TÉCNICO (0014): ASIGNAR/CAMBIAR_ESTADO/RESOLVER.
@@ -318,7 +325,7 @@ begin
     raise exception 'Estado "% no existe en el catálogo del sistema', p_nuevo_estado;
   end if;
 
-  if not public.transicion_tecnico_valida(v_actual::nombre, p_nuevo_estado::nombre) then
+  if not public.transicion_tecnico_valida(v_actual::text, p_nuevo_estado::text) then
     raise exception 'Transición no permitida: % → %', v_actual, p_nuevo_estado;
   end if;
 
