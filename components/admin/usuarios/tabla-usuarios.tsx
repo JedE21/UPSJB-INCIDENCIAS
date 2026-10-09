@@ -19,6 +19,7 @@ import { ConfirmDialog } from "@/components/shared/confirm-dialog";
 import { EmptyState } from "@/components/shared/empty-state";
 import { FilterBar } from "@/components/shared/filter-bar";
 import { Modal } from "@/components/ui/modal";
+import { ModalCrearUsuario } from "@/components/admin/usuarios/modal-crear-usuario";
 import { SearchInput } from "@/components/shared/search-input";
 import { Select } from "@/components/ui/select";
 import {
@@ -59,6 +60,7 @@ export function TablaUsuarios({
   const [usuarioEstado, setUsuarioEstado] = React.useState<FilaUsuario | null>(null);
   const [rolSeleccionado, setRolSeleccionado] = React.useState("");
   const [procesando, setProcesando] = React.useState(false);
+  const [crearAbierto, setCrearAbierto] = React.useState(false);
 
   const rolesConUsuarios = React.useMemo(
     () => Array.from(new Set(usuarios.flatMap((u) => u.roles.map((r) => r.nombre)))).sort(),
@@ -137,6 +139,13 @@ export function TablaUsuarios({
           </>
         }
       />
+
+      <div className="flex justify-end">
+        <Button onClick={() => setCrearAbierto(true)}>
+          <Plus aria-hidden />
+          Crear usuario
+        </Button>
+      </div>
 
       {usuarios.length === 0 ? (
         <EmptyState
@@ -224,6 +233,13 @@ export function TablaUsuarios({
           </Table>
         </div>
       )}
+
+      {/* Modal Crear usuario */}
+      <ModalCrearUsuario
+        roles={roles}
+        open={crearAbierto}
+        onClose={() => setCrearAbierto(false)}
+      />
 
       {/* Ficha de roles */}
       <Modal

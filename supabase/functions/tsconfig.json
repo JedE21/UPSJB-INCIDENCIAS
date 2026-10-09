@@ -1,0 +1,12 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "lib": ["ES2022"],
+    "strict": true,
+    "noEmit": true,
+    "skipLibCheck": true,
+    "types": ["https://esm.sh/@supabase/supabase-js@2", "https://esm.sh/@supabase/functions-js@2"]
+  },
+  "include": ["**/*.ts"],
+  "exclude": []
+}

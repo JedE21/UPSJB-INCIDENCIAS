@@ -36,3 +36,7 @@ next-env.d.ts
 
 .vercel
 .env*
+# Solo el estado local del CLI de Supabase; las migraciones Y Edge Functions
+# del proyecto se versionan (0021 etc. costó descubrir esta exclusión).
+supabase/.temp/
+supabase/supabase/
