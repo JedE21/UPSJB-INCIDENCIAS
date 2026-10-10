@@ -68,7 +68,8 @@ export interface CampoTabla {
 
 /** Fila normalizada que consumen las tablas (siempre strings/booleanos/planos). */
 export interface FilaEntidad {
-  id: string;
+  /** PK simple o alias id:<col> (tablas hijas con PK == FK). Puede faltar si la fila usa clave compuesta. */
+  id?: string;
   activo?: boolean;
   /** Etiquetas de jerarquía ya resueltas en servidor. */
   jerarquia?: string[];
@@ -133,7 +134,7 @@ export const ENTIDAD_SEDES: EntidadAdmin = {
   tieneActivo: true,
   buscarPlaceholder: "Buscar por nombre o código…",
   grupo: "infraestructura",
-  select: "id, nombre, codigo, direccion, activa as activo",
+  select: "id, nombre, codigo, direccion, activo:activa",
   orden: { campo: "nombre" },
   campos: [
     { name: "nombre", label: "Nombre", tipo: "texto", requerido: true, max: 120 },
@@ -361,7 +362,8 @@ export const ENTIDAD_AULAS: EntidadAdmin = {
   buscarPlaceholder: "Buscar por ambiente…",
   grupo: "infraestructura",
   select:
-    "id, ambiente_id ( id, nombre, codigo, activo, pisos ( numero, nombre, pabellones ( nombre, sedes ( nombre ) ) ) ), capacidad, tiene_computadoras",
+    "id:ambiente_id, ambiente_id ( id, nombre, codigo, activo, pisos ( numero, nombre, pabellones ( nombre, sedes ( nombre ) ) ) ), capacidad, tiene_computadoras",
+  claveCompuesta: ["ambiente_id"],
   orden: { campo: "ambiente_id" },
   campos: [
     {
@@ -395,7 +397,8 @@ export const ENTIDAD_LABORATORIOS: EntidadAdmin = {
   buscarPlaceholder: "Buscar por ambiente…",
   grupo: "infraestructura",
   select:
-    "id, ambiente_id ( id, nombre, codigo, activo, pisos ( numero, nombre, pabellones ( nombre, sedes ( nombre ) ) ) ), capacidad, tipo_laboratorio",
+    "id:ambiente_id, ambiente_id ( id, nombre, codigo, activo, pisos ( numero, nombre, pabellones ( nombre, sedes ( nombre ) ) ) ), capacidad, tipo_laboratorio",
+  claveCompuesta: ["ambiente_id"],
   orden: { campo: "ambiente_id" },
   campos: [
     {
@@ -429,7 +432,8 @@ export const ENTIDAD_CARACTERISTICAS: EntidadAdmin = {
   buscarPlaceholder: "Buscar por ambiente…",
   grupo: "infraestructura",
   select:
-    "id, ambiente_id ( id, nombre, codigo, activo, pisos ( numero, nombre, pabellones ( nombre, sedes ( nombre ) ) ) ), capacidad, proyector, computadoras, internet, aire_acondicionado, pizarra, observaciones",
+    "id:ambiente_id, ambiente_id ( id, nombre, codigo, activo, pisos ( numero, nombre, pabellones ( nombre, sedes ( nombre ) ) ) ), capacidad, proyector, computadoras, internet, aire_acondicionado, pizarra, observaciones",
+  claveCompuesta: ["ambiente_id"],
   orden: { campo: "ambiente_id" },
   campos: [
     {
@@ -954,7 +958,9 @@ export const ENTIDAD_REGLAS_ENRUTAMIENTO: EntidadAdmin = {
   buscarPlaceholder: "Buscar por nombre, tipo o área destino…",
   grupo: "configuracion",
   select:
-    "id, nombre, prioridad_orden, activa as activo, tipo_incidencia_id ( id, nombre ), subtipo_incidencia_id ( id, nombre ), area_destino_id ( id, nombre ), servicio_destino_id ( id, nombre ), prioridad_defecto_id ( id, nombre )",
+    "id, nombre, prioridad_orden, activo:activa, tipo_incidencia_id ( id, nombre ), subtipo_incidencia_id ( id, nombre ), area_destino_id ( id, nombre ), servicio_destino_id ( id, nombre ), prioridad_defecto_id ( id, nombre )",
+  // La tabla usa `activa` (0001); los componentes leen `activo` y el toggle
+  // escribe `activa` vía COLUMNA_ACTIVO.
   orden: { campo: "prioridad_orden" },
   campos: [
     { name: "nombre", label: "Nombre de la regla", tipo: "texto", requerido: true, max: 120, hint: 'Ej.: "Internet → Sistemas/Redes". Se muestra en el historial de la incidencia.' },

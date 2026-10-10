@@ -108,7 +108,7 @@ export function FormularioEntidad({
           ? JSON.stringify(
               Object.fromEntries(entidad.claveCompuesta.map((c) => [c, String(fila[c] ?? "")]))
             )
-          : fila.id
+          : String(fila.id ?? "")
       );
     }
 

@@ -87,7 +87,7 @@ export async function retirarRol(
   // (evita perder el control del sistema accidentalmente).
   const { data: propia } = await supabase
     .from("usuarios_roles")
-    .select("rol_id, roles ( nombre )")
+    .select("rol_id, roles!fk_usuarios_roles_rol ( nombre )")
     .eq("perfil_id", guardia.usuarioId)
     .eq("rol_id", rolId)
     .maybeSingle<{ rol_id: string; roles: { nombre: string } | null }>();

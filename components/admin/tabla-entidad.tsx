@@ -143,7 +143,7 @@ export function TablaEntidad({
         ? JSON.stringify(
             Object.fromEntries(entidad.claveCompuesta.map((c) => [c, String(filaToggle[c] ?? "")]))
           )
-        : filaToggle.id
+        : String(filaToggle.id ?? "")
     );
     fd.set("__nuevo_estado", String(!filaToggle.activo));
     let res;
@@ -243,7 +243,7 @@ export function TablaEntidad({
           rowKey={(f) =>
             entidad.claveCompuesta
               ? entidad.claveCompuesta.map((c) => String(f[c] ?? "")).join("::")
-              : f.id
+              : String(f.id ?? "")
           }
           searchable={false}
           pageSize={10}

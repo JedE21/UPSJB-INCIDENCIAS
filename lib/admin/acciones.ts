@@ -30,6 +30,7 @@ const RE_UUID = /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0
 const COLUMNA_ACTIVO: Record<string, string> = {
   sedes: "activa",
   asignaciones: "activa", // equipos_ambientes usa `activa` (activación de la asignación)
+  reglas: "activa", // reglas_enrutamiento usa `activa` (0001)
 };
 
 /** Rutas que deben refrescarse tras un cambio en cualquier entidad. */

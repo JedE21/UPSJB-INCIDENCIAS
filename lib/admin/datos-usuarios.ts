@@ -36,7 +36,7 @@ export async function listarUsuarios(): Promise<ListadoUsuarios> {
     .select(
       `id, nombres, apellido_paterno, apellido_materno, correo, documento, telefono,
        codigo_usuario, estado, creado_en,
-       usuarios_roles ( rol_id, roles ( id, nombre, activo ) )`
+       usuarios_roles!fk_usuarios_roles_perfil ( rol_id, roles!fk_usuarios_roles_rol ( id, nombre, activo ) )`
     )
     .order("creado_en", { ascending: false });
 
