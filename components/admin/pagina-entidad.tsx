@@ -115,7 +115,7 @@ export async function PaginaEntidad({ grupo, slug, acciones }: PropsEntidad) {
         </CardHeader>
         <CardContent>
           <TablaEntidad
-            entidad={entidad}
+            slug={entidad.slug}
             filas={filas}
             referencias={referenciasPorCampo}
             errorCarga={error ? mensajeDeLectura({ message: error }) : null}

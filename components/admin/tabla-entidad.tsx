@@ -13,7 +13,7 @@ import { Select } from "@/components/ui/select";
 import { useToast } from "@/components/ui/toast";
 import { FormularioEntidad, type ReferenciasEntidad } from "@/components/admin/formulario-entidad";
 import { alternarEntidad } from "@/lib/admin/acciones";
-import type { EntidadAdmin, FilaEntidad } from "@/lib/admin/entidades";
+import { entidadPorSlug, type EntidadAdmin, type FilaEntidad } from "@/lib/admin/entidades";
 import { Alert } from "@/components/ui/alert";
 
 /**
@@ -22,19 +22,34 @@ import { Alert } from "@/components/ui/alert";
  * Recibe filas ya cargadas en servidor (RLS filtradas), aplica búsqueda y
  * filtros del lado cliente, y expone crear/editar/activar-desactivar con
  * confirmación. El borrado físico no existe en el modelo (docs/01 §2.7).
+ *
+ * La ENTIDAD se resuelve aquí (cliente) por slug: su definición declarativa
+ * contiene funciones (value/cell/icono) que NO se pueden serializar desde un
+ * Server Component (Next 16 → error de render). Importar el módulo a ambos
+ * lados es seguro: es puro (sin efectos) y tree-shakeable.
  */
 export function TablaEntidad({
-  entidad,
+  slug,
   filas,
   referencias,
   errorCarga,
 }: {
-  entidad: EntidadAdmin;
+  /** Slug de la entidad (la definición completa se resuelve en el cliente). */
+  slug: string;
   filas: FilaEntidad[];
   referencias?: ReferenciasEntidad;
   /** Mensaje si la carga en servidor falló (p. ej. permisos). */
   errorCarga?: string | null;
 }) {
+  const entidad = entidadPorSlug(slug) as EntidadAdmin | null;
+  if (!entidad) {
+    return (
+      <Alert variant="destructive">
+        <p className="font-medium">Entidad desconocida</p>
+        <p>No existe una definición para «{slug}».</p>
+      </Alert>
+    );
+  }
   const router = useRouter();
   const { toast } = useToast();
 
@@ -80,7 +95,7 @@ export function TablaEntidad({
         .toLowerCase();
       return texto.includes(q);
     });
-  }, [filas, busqueda, filtros, entidad]);
+  }, [entidad, filas, busqueda, filtros]);
 
   const columnas = React.useMemo(
     () => [
@@ -112,7 +127,7 @@ export function TablaEntidad({
         className: "text-right",
         cell: (fila: FilaEntidad) => (
           <div className="flex justify-end">
-            <FormularioEntidad entidad={entidad} fila={fila} referencias={referencias} />
+            <FormularioEntidad slug={entidad.slug} fila={fila} referencias={referencias} />
             {entidad.tieneActivo ? (
               <Button
                 variant="ghost"
@@ -219,7 +234,7 @@ export function TablaEntidad({
                 </Select>
               );
             })}
-            <FormularioEntidad entidad={entidad} referencias={referencias} />
+            <FormularioEntidad slug={entidad.slug} referencias={referencias} />
           </>
         }
       />

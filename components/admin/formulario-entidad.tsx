@@ -13,13 +13,16 @@ import { Textarea } from "@/components/ui/textarea";
 import { FormField } from "@/components/shared/form-field";
 import { useToast } from "@/components/ui/toast";
 import { crearEntidad, editarEntidad, type EstadoAccionAdmin } from "@/lib/admin/acciones";
-import type { CampoEntidad, EntidadAdmin, FilaEntidad } from "@/lib/admin/entidades";
+import { entidadPorSlug, type CampoEntidad, type EntidadAdmin, type FilaEntidad } from "@/lib/admin/entidades";
 import type { Referencia } from "@/lib/admin/datos";
 
 /**
  * Formulario CRUD genérico (modal). Se construye SOLO desde la definición
  * declarativa de la entidad: tipos, requeridos, rangos y CHECK replicados.
  * La validación del servidor y RLS vuelven a imponer las reglas.
+ *
+ * La ENTIDAD se resuelve aquí (cliente) por slug: su definición declarativa
+ * contiene funciones/props no serializables desde un Server Component.
  */
 
 export interface ReferenciasEntidad {
@@ -57,15 +60,18 @@ function valorInicial(
 }
 
 export function FormularioEntidad({
-  entidad,
+  slug,
   fila,
   referencias,
 }: {
-  entidad: EntidadAdmin;
+  /** Slug de la entidad (la definición completa se resuelve en el cliente). */
+  slug: string;
   /** Fila a editar; null/undefined → modo creación. */
   fila?: FilaEntidad | null;
   referencias?: ReferenciasEntidad;
 }) {
+  const entidad = entidadPorSlug(slug) as EntidadAdmin | null;
+  if (!entidad || entidad.campos.length === 0) return null;
   const router = useRouter();
   const { toast } = useToast();
   const esEdicion = Boolean(fila);
@@ -143,9 +149,7 @@ export function FormularioEntidad({
     router.refresh();
   };
 
-  // Entidades de solo lectura (sin campos editables, p. ej. movimientos):
-  // no ofrecen alta ni edición desde la UI. Va DESPUÉS de los hooks.
-  if (entidad.campos.length === 0) return null;
+  // Entidades de solo lectura (sin campos editables, p. ej. movimientos): Ya no se ofrecen alta ni edición desde la UI. Va DESPUÉS de los hooks.
 
   const Icono = esEdicion ? Pencil : Plus;
   const camposVisibles = entidad.campos.filter(
